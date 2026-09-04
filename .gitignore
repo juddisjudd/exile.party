@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+
+# Build output
+/.svelte-kit
+/build
+
+# Test output
+test-results
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Vite
+vite.config.*.timestamp-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AI Slop
+CLAUDE.md
+/.claude
