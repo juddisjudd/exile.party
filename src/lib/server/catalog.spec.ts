@@ -14,6 +14,7 @@ tools:
     category: trade
     platforms: [web]
     pricing: free
+    openSource: false
     status: active
     lastVerified: 2026-09-04
 `;

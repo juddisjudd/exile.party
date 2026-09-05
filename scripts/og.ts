@@ -1,0 +1,147 @@
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { Renderer } from '@takumi-rs/core';
+import { render } from 'takumi-js';
+import { loadCatalog } from '../src/lib/server/catalog';
+import { GAME_LABEL, PLATFORM_LABEL, PRICING_LABEL, monogram } from '../src/lib/catalog/display';
+import { SITE_NAME } from '../src/lib/site';
+
+const OUT = resolve(process.cwd(), 'static/og');
+/** static/og is gitignored, so the README banner needs a copy that is committed. */
+const BANNER = resolve(process.cwd(), '.github/og.png');
+const WIDTH = 1200;
+const HEIGHT = 630;
+
+/* The dark half of the token set, inlined: the image cannot read CSS variables, and a card
+   that renders dark reads correctly against both light and dark chat backgrounds. */
+const C = {
+	canvas: '#141619',
+	surface: '#191c21',
+	line: '#262930',
+	ink: '#eceded',
+	muted: '#b3b4bd',
+	faint: '#82848f',
+	accent: '#7b8ff0'
+};
+
+const FONT_DIR = 'node_modules/@fontsource-variable/geist/files';
+
+function esc(s: string): string {
+	return s
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+}
+
+/** Shared chrome: brand top-left, an accent rule down the left edge. */
+function card(body: string, eyebrow: string): string {
+	return `<div style="display:flex;flex-direction:column;width:100%;height:100%;background:${C.canvas};font-family:Geist;padding:72px 80px;position:relative">
+    <div style="display:flex;position:absolute;left:0;top:0;width:8px;height:100%;background:${C.accent}"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;font-size:26px;font-weight:500;color:${C.ink}">${esc(SITE_NAME)}</div>
+      <div style="display:flex;font-size:22px;color:${C.faint}">${esc(eyebrow)}</div>
+    </div>
+    ${body}
+  </div>`;
+}
+
+function chip(text: string): string {
+	return `<div style="display:flex;border:1px solid ${C.line};border-radius:8px;padding:6px 14px;font-size:22px;color:${C.muted}">${esc(text)}</div>`;
+}
+
+function toolCard(tool: ReturnType<typeof loadCatalog>['tools'][number], category: string): string {
+	const meta = [
+		PRICING_LABEL[tool.pricing],
+		tool.openSource ? 'Open source' : 'Closed source',
+		tool.platforms.map((p) => PLATFORM_LABEL[p]).join(', ')
+	];
+
+	return card(
+		`<div style="display:flex;flex-direction:column;flex:1;justify-content:center">
+      <div style="display:flex;align-items:center;gap:28px">
+        <div style="display:flex;align-items:center;justify-content:center;width:96px;height:96px;border:1px solid ${C.line};border-radius:20px;font-size:48px;font-weight:500;color:${C.muted};background:${C.surface}">${esc(monogram(tool.name))}</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;font-size:64px;font-weight:600;color:${C.ink};letter-spacing:-1.5px">${esc(tool.name)}</div>
+          <div style="display:flex;gap:12px;font-size:22px;color:${C.faint}">${tool.games.map((g) => esc(GAME_LABEL[g])).join(' &middot; ')}</div>
+        </div>
+      </div>
+      <div style="display:flex;margin-top:36px;font-size:30px;line-height:1.4;color:${C.muted};max-width:940px">${esc(tool.description)}</div>
+    </div>
+    <div style="display:flex;gap:12px">${meta.map(chip).join('')}</div>`,
+		category
+	);
+}
+
+function pageCard(title: string, subtitle: string, eyebrow: string): string {
+	return card(
+		`<div style="display:flex;flex-direction:column;flex:1;justify-content:center">
+      <div style="display:flex;font-size:78px;font-weight:600;color:${C.ink};letter-spacing:-2.5px;line-height:1.08;max-width:900px">${esc(title)}</div>
+      <div style="display:flex;margin-top:28px;font-size:30px;color:${C.muted};max-width:820px">${esc(subtitle)}</div>
+    </div>`,
+		eyebrow
+	);
+}
+
+async function main() {
+	const catalog = loadCatalog();
+	const renderer = new Renderer();
+
+	// One variable file, declared at both weights the cards use.
+	const regular = readFileSync(`${FONT_DIR}/geist-latin-wght-normal.woff2`);
+	await renderer.registerFont({ name: 'Geist', data: regular, weight: 400 });
+	await renderer.registerFont({ name: 'Geist', data: regular, weight: 600 });
+
+	rmSync(OUT, { recursive: true, force: true });
+	mkdirSync(OUT, { recursive: true });
+
+	const jobs: { file: string; html: string }[] = [
+		{
+			file: 'home.png',
+			html: pageCard(
+				'Third-party tools for Path of Exile 1 & 2',
+				`A directory of ${catalog.tools.length} community tools. Every listing says what platform it runs on, what it costs, and whether the source is open.`,
+				''
+			)
+		},
+		{
+			file: 'tools.png',
+			html: pageCard(
+				'All tools',
+				`${catalog.tools.length} tools across ${catalog.categories.length} categories. Filter by game, category, price, and licence.`,
+				'Directory'
+			)
+		},
+		{
+			file: 'maintainers.png',
+			html: pageCard(
+				'Maintainers',
+				'The people who keep this directory running. Anyone can add a listing by pull request.',
+				''
+			)
+		}
+	];
+
+	for (const tool of catalog.tools) {
+		const category = catalog.categories.find((c) => c.id === tool.category);
+		jobs.push({
+			file: `tool-${tool.id}.png`,
+			html: toolCard(tool, category?.name ?? tool.category)
+		});
+	}
+
+	for (const job of jobs) {
+		const buffer = await render(job.html, {
+			renderer,
+			width: WIDTH,
+			height: HEIGHT,
+			format: 'png'
+		});
+		writeFileSync(resolve(OUT, job.file), buffer);
+		if (job.file === 'home.png') writeFileSync(BANNER, buffer);
+	}
+
+	console.log(`og: wrote ${jobs.length} images to static/og, plus .github/og.png`);
+}
+
+await main();

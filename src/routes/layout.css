@@ -1,1 +1,90 @@
 @import 'tailwindcss';
+
+/* Upright weights only. Fontsource ships per-subset @font-face with unicode-range,
+   so the browser fetches latin and nothing else. */
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/geist-mono/wght.css';
+
+@import '../lib/styles/tokens.css';
+
+@layer base {
+	/* Tailwind v4 borders default to currentColor; hairlines are the house default here. */
+	*,
+	::before,
+	::after {
+		border-color: var(--line);
+	}
+
+	html {
+		background-color: var(--canvas);
+		/* Fallback alignment for browsers that ignore the scrollbar-width below. */
+		scrollbar-gutter: stable;
+		/* The directory replaces the scrollbar with a step control; hiding it only there would
+		   put the page-to-page alignment shift back, so it goes site-wide. */
+		scrollbar-width: none;
+	}
+
+	html::-webkit-scrollbar,
+	body::-webkit-scrollbar {
+		display: none;
+	}
+
+	body {
+		background-color: var(--canvas);
+		color: var(--ink);
+		font-family: var(--font-sans);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	/* Tailwind v4 Preflight sets buttons to cursor:default. Put the pointer back everywhere. */
+	button:not(:disabled),
+	summary,
+	label[for],
+	[role='button']:not([aria-disabled='true']),
+	a[href] {
+		cursor: pointer;
+	}
+
+	button:disabled,
+	[aria-disabled='true'] {
+		cursor: default;
+	}
+
+	::selection {
+		background-color: var(--accent-tint);
+		color: var(--accent);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+
+	/* Theme switching only. The default cross-fade is replaced by a circular reveal of the new
+	   theme, driven from theme.svelte.ts; the old theme just sits underneath it. */
+	html[data-theme-transition]::view-transition-old(root),
+	html[data-theme-transition]::view-transition-new(root) {
+		animation: none;
+		mix-blend-mode: normal;
+	}
+
+	html[data-theme-transition]::view-transition-old(root) {
+		z-index: 1;
+	}
+
+	html[data-theme-transition]::view-transition-new(root) {
+		z-index: 9999;
+	}
+
+	/* Hover is a border or background shift, never motion. Honour the OS setting anyway. */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		::before,
+		::after {
+			transition-duration: 0.01ms !important;
+			animation-duration: 0.01ms !important;
+		}
+	}
+}
