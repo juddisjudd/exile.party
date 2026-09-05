@@ -5,7 +5,7 @@
 	import type { Game } from '$lib/catalog/schema';
 	import GamePanel from '$lib/components/GamePanel.svelte';
 	import Meta from '$lib/components/Meta.svelte';
-	import { rememberGame, requestReveal } from '$lib/game';
+	import { gameStore, rememberGame, requestReveal, takeReveal } from '$lib/game';
 
 	let { data } = $props();
 
@@ -34,12 +34,12 @@
 
 	async function pick(game: Game, href: string) {
 		if (expanding !== null) return;
-		rememberGame(game, localStorage);
+		rememberGame(game, gameStore());
 
 		const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 		if (still || typeof document.startViewTransition !== 'function') {
 			// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
-			await goto(href);
+			await goto(href, { replaceState: true });
 			return;
 		}
 
@@ -51,9 +51,10 @@
 		requestReveal();
 		try {
 			// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
-			await goto(href);
+			await goto(href, { replaceState: true });
 		} catch {
-			// A failed navigation hands the chooser back rather than leaving it mid-expand.
+			// The reveal never happened: clear the flag so the next unrelated navigation doesn't inherit it.
+			takeReveal();
 			expanding = null;
 		}
 	}
@@ -63,9 +64,7 @@
      carries the brand into social cards. -->
 <Meta
 	title="Curated directory of Path of Exile 1 & 2 third-party tools"
-	description="A curated directory of {data.counts.poe1 +
-		data.counts
-			.poe2} third-party tools for Path of Exile 1 and 2. Pick your game, then browse by category, platform, price, and whether the source is open."
+	description="A curated directory of {data.total} third-party tools for Path of Exile 1 and 2. Pick your game, then browse by category, platform, price, and whether the source is open."
 	image="home.png"
 	path="/"
 />
@@ -139,11 +138,7 @@
 			onpick={pick}
 		/>
 
-		<!-- Percent coordinates so the seam follows the same numbers the panels clip on. -->
-		<svg class="seam pointer-events-none absolute inset-0 size-full" aria-hidden="true">
-			<line class="hidden md:block" x1="{seamTop}%" y1="0" x2="{seamBottom}%" y2="100%" />
-			<line class="md:hidden" x1="0" y1="52%" x2="100%" y2="48%" />
-		</svg>
+		<div class="seam pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
 		<div
 			class="glow pointer-events-none absolute left-1/2 hidden md:block"
@@ -152,17 +147,37 @@
 	</div>
 
 	<p
-		class="credit pointer-events-none absolute inset-x-0 bottom-2 z-10 text-center text-[11px] text-faint/75 md:bottom-4"
+		class="credit pointer-events-none absolute inset-x-0 bottom-2 z-10 text-center text-[11px] text-faint md:bottom-4"
 	>
 		Artwork by Grinding Gear Games. Not affiliated with GGG.
 	</p>
 </div>
 
 <style>
-	.seam line {
-		stroke: var(--line-strong);
-		stroke-width: 1;
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+	@reference './layout.css';
+
+	/* One-pixel hairline clipped out of a full-size box, so it slides with the panels. */
+	.seam {
+		background: var(--line-strong);
+		clip-path: polygon(
+			0 calc(52% - 0.5px),
+			100% calc(48% - 0.5px),
+			100% calc(48% + 0.5px),
+			0 calc(52% + 0.5px)
+		);
+		transition:
+			clip-path 200ms cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	@variant md {
+		.seam {
+			clip-path: polygon(
+				calc(var(--seam-top) - 0.5px) 0,
+				calc(var(--seam-top) + 0.5px) 0,
+				calc(var(--seam-bottom) + 0.5px) 100%,
+				calc(var(--seam-bottom) - 0.5px) 100%
+			);
+		}
 	}
 
 	/* Darkens the art behind the headline block. */
@@ -180,7 +195,6 @@
 	}
 
 	.band,
-	.seam,
 	.credit,
 	.glow {
 		transition: opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);

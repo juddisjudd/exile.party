@@ -49,6 +49,9 @@
 	onfocus={() => onhover(game)}
 	onblur={() => onhover(null)}
 	onclick={(event) => {
+		// Modifier clicks and non-primary buttons stay with the browser, as SvelteKit's own link handling does.
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
+			return;
 		event.preventDefault();
 		onpick(game, href);
 	}}
@@ -136,7 +139,9 @@
 		width: 100%;
 		transition:
 			left 450ms cubic-bezier(0.4, 0, 0.2, 1),
-			width 450ms cubic-bezier(0.4, 0, 0.2, 1);
+			width 450ms cubic-bezier(0.4, 0, 0.2, 1),
+			top 450ms cubic-bezier(0.4, 0, 0.2, 1),
+			height 450ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 	.panel-left .art {
 		top: 0;
@@ -156,6 +161,11 @@
 			rgb(20 22 25 / 0.14) 64%,
 			rgb(20 22 25 / 0.55) 100%
 		);
+		transition:
+			left 450ms cubic-bezier(0.4, 0, 0.2, 1),
+			width 450ms cubic-bezier(0.4, 0, 0.2, 1),
+			top 450ms cubic-bezier(0.4, 0, 0.2, 1),
+			height 450ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 	/* The shade box covers only this half, matching .art's geometry, so each half darkens
 	   towards its own bottom edge instead of the gradient spanning the full stacked anchor. */
@@ -166,6 +176,14 @@
 	.panel-right .shade {
 		top: 48%;
 		height: 52%;
+	}
+
+	/* Below md, an expanding panel's art and shade grow to fill the full height too, so the
+	   expand animation does not leave the boxed-in other half of the stack empty. */
+	.panel[data-expanding] .art,
+	.panel[data-expanding] .shade {
+		top: 0;
+		height: 100%;
 	}
 
 	.label {
@@ -200,6 +218,14 @@
 		background-color: var(--accent-fill);
 		border-color: var(--accent-fill);
 		color: var(--accent-on-fill);
+	}
+
+	/* The panel itself carries outline-none so the arrow fill can be the hover signal too, but
+	   that leaves keyboard focus with no indicator at all. Put a visible outline back on the label. */
+	.panel:focus-visible .label {
+		outline: 2px solid var(--accent);
+		outline-offset: 8px;
+		border-radius: 2px;
 	}
 
 	@variant md {

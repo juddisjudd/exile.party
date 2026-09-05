@@ -160,3 +160,39 @@ test('client-side navigation to / also honours the remembered game', async ({ pa
 	await expect(page).toHaveURL(/\/\?choose$/);
 	await expect(page.locator('h1')).toHaveText('Welcome to the Party, Exile');
 });
+
+test('a panel can be picked from the keyboard', async ({ page }) => {
+	await page.goto('/');
+	await page.getByRole('link', { name: /^Path of Exile tools/ }).focus();
+	await page.keyboard.press('Enter');
+	await expect(page).toHaveURL(/\/poe1$/);
+});
+
+test('a modifier click on a panel is left to the browser', async ({ page, context }) => {
+	await page.goto('/');
+	const [popup] = await Promise.all([
+		context.waitForEvent('page'),
+		page
+			.getByRole('link', { name: /^Path of Exile 2 tools/ })
+			.click({ modifiers: ['ControlOrMeta'] })
+	]);
+	await expect(popup).toHaveURL(/\/poe2$/);
+	await expect(page).toHaveURL(/\/$/);
+});
+
+test('back from a picked game does not trap the visitor', async ({ page }) => {
+	await page.goto('/poe1');
+	await page.getByRole('link', { name: 'Switch game' }).first().click();
+	await expect(page).toHaveURL(/\/\?choose$/);
+	const poe2 = page.getByRole('link', { name: /^Path of Exile 2 tools/ });
+	// position: "Switch game" sits over the poe1 half, and the browser re-hit-tests the stationary
+	// pointer against the new page, so poe1 is still hovered here with no mouse movement at all.
+	// Both panels are identical full-viewport <a> elements, so an unqualified click lands on their
+	// shared bounding-box center, which the still-hovered poe1 half claims via the seam's hover
+	// shift. Aim at the corner that is unambiguously poe2's regardless of that shift.
+	const box = await poe2.boundingBox();
+	await poe2.click({ position: { x: box!.width - 20, y: 20 } });
+	await expect(page).toHaveURL(/\/poe2$/);
+	await page.goBack();
+	await expect(page).toHaveURL(/\/poe1$/);
+});

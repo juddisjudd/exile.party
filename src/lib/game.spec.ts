@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { GAME_KEY, readGame, rememberGame, requestReveal, takeReveal } from './game';
+import { afterEach, describe, expect, it } from 'vitest';
+import { GAME_KEY, gameStore, readGame, rememberGame, requestReveal, takeReveal } from './game';
 
 function fakeStore() {
 	const data = new Map<string, string>();
@@ -29,6 +29,35 @@ describe('rememberGame', () => {
 
 	it('does nothing without a store', () => {
 		expect(() => rememberGame('poe1', null)).not.toThrow();
+	});
+});
+
+describe('gameStore', () => {
+	afterEach(() => {
+		delete (globalThis as { localStorage?: unknown }).localStorage;
+	});
+
+	it('returns null when there is no localStorage global', () => {
+		expect(gameStore()).toBeNull();
+	});
+
+	it('returns the global when it is a plain object', () => {
+		const store = fakeStore();
+		Object.defineProperty(globalThis, 'localStorage', {
+			configurable: true,
+			value: store
+		});
+		expect(gameStore()).toBe(store);
+	});
+
+	it('returns null when reading the property itself throws, as blocked site data does', () => {
+		Object.defineProperty(globalThis, 'localStorage', {
+			configurable: true,
+			get() {
+				throw new Error('SecurityError');
+			}
+		});
+		expect(gameStore()).toBeNull();
 	});
 });
 

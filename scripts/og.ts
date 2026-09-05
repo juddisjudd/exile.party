@@ -3,7 +3,14 @@ import { resolve } from 'node:path';
 import { Renderer } from '@takumi-rs/core';
 import { render } from 'takumi-js';
 import { loadCatalog } from '../src/lib/server/catalog';
-import { GAME_LABEL, PLATFORM_LABEL, PRICING_LABEL, monogram } from '../src/lib/catalog/display';
+import {
+	GAME_LABEL,
+	GAME_NAME,
+	PLATFORM_LABEL,
+	PRICING_LABEL,
+	monogram
+} from '../src/lib/catalog/display';
+import { countByGame } from '../src/lib/catalog/home';
 import { SITE_NAME } from '../src/lib/site';
 
 const OUT = resolve(process.cwd(), 'static/og');
@@ -85,6 +92,7 @@ function pageCard(title: string, subtitle: string, eyebrow: string): string {
 
 async function main() {
 	const catalog = loadCatalog();
+	const counts = countByGame(catalog.tools);
 	const renderer = new Renderer();
 
 	// One variable file, declared at both weights the cards use.
@@ -120,22 +128,14 @@ async function main() {
 				''
 			)
 		},
-		{
-			file: 'poe1.png',
+		...(['poe1', 'poe2'] as const).map((game) => ({
+			file: `${game}.png`,
 			html: pageCard(
-				'Tools for Path of Exile',
-				`${catalog.tools.filter((t) => t.games.includes('poe1')).length} community tools for Path of Exile. Every listing says what platform it runs on, what it costs, and whether the source is open.`,
-				'Path of Exile'
+				`Tools for ${GAME_NAME[game]}`,
+				`${counts[game]} community tools for ${GAME_NAME[game]}. Every listing says what platform it runs on, what it costs, and whether the source is open.`,
+				GAME_NAME[game]
 			)
-		},
-		{
-			file: 'poe2.png',
-			html: pageCard(
-				'Tools for Path of Exile 2',
-				`${catalog.tools.filter((t) => t.games.includes('poe2')).length} community tools for Path of Exile 2. Every listing says what platform it runs on, what it costs, and whether the source is open.`,
-				'Path of Exile 2'
-			)
-		}
+		}))
 	];
 
 	for (const tool of catalog.tools) {

@@ -19,6 +19,15 @@ export function rememberGame(game: Game, store: GameStore | null | undefined): v
 	}
 }
 
+/** The page's localStorage, or null where reading the property itself throws (site data blocked). */
+export function gameStore(): GameStore | null {
+	try {
+		return localStorage;
+	} catch {
+		return null;
+	}
+}
+
 /** The remembered game, or null if there is none, it fails to parse, or the store throws. */
 export function readGame(store: GameStore | null | undefined): Game | null {
 	try {

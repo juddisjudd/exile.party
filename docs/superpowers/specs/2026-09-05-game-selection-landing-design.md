@@ -43,8 +43,10 @@ the per-game page.
 
 - `src/lib/game.ts`: `GAME_KEY = 'exile.game'` and `rememberGame(game, store)`, where
   `store` is the `getItem`/`setItem` subset of `Storage` so tests pass a plain object.
-  Same try/catch shape as `theme.svelte.ts`. Nothing reads the value from the app; the
-  inline script below is the only reader.
+  Same try/catch shape as `theme.svelte.ts`. The inline script below reads it on full
+  loads; the root layout reads it through `readGame` in a `beforeNavigate` guard for
+  client-side navigation, leaving popstate alone so Back is never trapped. `pick()`
+  navigates with `replaceState`, so `/` never sits in history behind a game page.
 - `src/app.html` gains a second inline script, before paint: if `location.pathname`
   is `/` and the querystring does not contain `choose` and the stored value is `poe1`
   or `poe2`, `location.replace('/' + game)`. The key is duplicated there with a keep-in-sync
