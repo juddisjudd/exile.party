@@ -26,6 +26,9 @@ categories:
   - id: community
     name: Community
     description: Wikis, Discords, build aggregators.
+  - id: league-specific
+    name: League Specific
+    description: Tools built for a single league mechanic; expect them to go quiet once the league ends.
 
 # ---------------------------------------------------------------------------
 # All URLs below were supplied by the site maintainer.
@@ -259,3 +262,19 @@ tools:
     editorsPick: true
     status: active
     lastVerified: 2026-09-05
+
+  - id: runeshape-price-checker
+    name: RuneshapePriceChecker
+    description: >-
+      Overlay that reads the Runes of Aldur runeshape panel with OCR and shows colour-coded prices from
+      poe2scout or poe.ninja next to each row.
+    url: https://github.com/Barragek0/RuneshapePriceChecker
+    games: [poe2]
+    category: league-specific
+    tags: [overlay, price-check, ocr]
+    platforms: [windows]
+    pricing: free
+    openSource: true
+    status: active
+    lastVerified: 2026-09-05
+    notes: Needs borderless windowed mode and UI brightness above -0.8, or the capture fails.
