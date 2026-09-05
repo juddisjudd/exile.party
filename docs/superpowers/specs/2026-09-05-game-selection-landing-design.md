@@ -28,13 +28,13 @@ Decisions already taken (in conversation, 2026-09-05):
 
 ## Routes
 
-| Route                         | Change                                                                              |
-| ----------------------------- | ----------------------------------------------------------------------------------- |
-| `/`                           | Becomes the chooser. Keeps the SEO title and description the home page has today.   |
-| `/?choose`                    | Same page; the querystring only suppresses the redirect below.                      |
-| `/poe1`, `/poe2`              | New. `src/routes/[game=game]/` with a `src/params/game.ts` matcher and `entries()`. |
-| `/tools`                      | Unchanged. The chooser's "Browse all tools" link points here with no game filter.   |
-| `/tools/[id]`, `/maintainers` | Unchanged.                                                                          |
+| Route                         | Change                                                                                                                                                                           |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                           | Becomes the chooser. Keeps the SEO title and description the home page has today.                                                                                                |
+| `/?choose`                    | Same page; the querystring only suppresses the redirect below.                                                                                                                   |
+| `/poe1`, `/poe2`              | New. The directory locked to that game: same page as `/tools`, game fixed by the route, context pill with Switch game in the top bar, filters round-trip without a `game` param. |
+| `/tools`                      | Unchanged. The chooser's "Browse all tools" link points here with no game filter.                                                                                                |
+| `/tools/[id]`, `/maintainers` | Unchanged.                                                                                                                                                                       |
 
 Today's `/` content (hero, category list for both games) is retired. Its pieces move to
 the per-game page.
@@ -128,27 +128,15 @@ behaviour.
 
 ## Per-game page
 
-`src/routes/[game=game]/+page.server.ts` load returns `game`, `total`, `startHere`,
-`categories` (id, name, per-game count) and `builtAt`. `entries()` returns both games.
+`/poe1` and `/poe2` are the directory (`src/lib/components/ToolDirectory.svelte`, shared
+with `/tools`) with the game locked by the route: the top bar shows the context pill
+("PoE 1" / "PoE 2" plus "Switch game", to `/?choose`) instead of the toggle, the h1 reads
+"Path of Exile tools" / "Path of Exile 2 tools", and filters round-trip through the URL
+without a `game` param. The hero, `HeroOcean`, the "Start here" strip and the category
+list that used to live on this page were dropped after comparing them against the
+directory view and preferring the directory.
 
-Sections, top to bottom:
-
-1. `TopBar` with a new `context` prop. When set it renders a pill group after the brand:
-   the current game as the active segment and a "Switch game" segment linking to
-   `/?choose`. It also renders the search box; with a new `onsearch` callback, Enter
-   navigates to `/tools?game=<game>&q=<query>`. The theme toggle stays.
-2. Hero, same layout as today's home: eyebrow "Path of Exile 2 · 13 tools", h1
-   "Tools for Path of Exile 2", the existing paragraph with the per-game count,
-   "Browse all 13 tools" (accent fill, to `/tools?game=poe2`) and "Submit a tool".
-   `HeroOcean` stays behind it.
-3. "Start here": a 3-column grid (2 at `sm`) of `ToolCard`s. Rule: the first editor's pick
-   in each category, category order, capped at six. 12 of the 13 PoE 2 tools are picks, so
-   "all picks" would be the directory again. Order is changed by reordering `tools.yaml`.
-4. Categories: today's list with per-game counts, each linking to
-   `/tools?game=<game>&cat=<id>`. Zero-count rows render faint and unlinked, as today.
-5. `SiteFooter`, unchanged.
-
-Meta: title "Path of Exile 2 tools · exile.party", description with the count, OG image
+Meta: title "Path of Exile 2 tools · exile.party", description naming the game, OG image
 `poe1.png` / `poe2.png` added to `scripts/og.ts` via the existing `pageCard`.
 
 ## Data helpers
@@ -156,17 +144,13 @@ Meta: title "Path of Exile 2 tools · exile.party", description with the count, 
 Pure functions in `src/lib/catalog/home.ts`, safe on both sides:
 
 - `countByGame(tools): Record<Game, number>`
-- `startHere(catalog, game, limit = 6): Tool[]`
-- `categoryCounts(catalog, game): { id, name, description, count }[]`
 
 ## Testing
 
 Vitest, server project, inline fixtures built with a `tool()` helper as `filter.spec.ts`
 does today:
 
-- `startHere`: one per category, category order, cap respected, categories without a
-  pick skipped, tools not in the game excluded.
-- `categoryCounts` and `countByGame` against the same fixture.
+- `countByGame` against the fixture.
 - `game.svelte.ts` read/write round trip and the private-mode catch.
 
 Playwright, `e2e/site.e2e.ts`:

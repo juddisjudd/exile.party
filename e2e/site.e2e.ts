@@ -1,16 +1,23 @@
 import { expect, test } from '@playwright/test';
 
-test('a game page is a hero that links into its directory', async ({ page }) => {
+test('a game page is the directory locked to that game', async ({ page }) => {
 	await page.goto('/poe1');
-	await expect(page.locator('h1')).toHaveText('Tools for Path of Exile');
-	await page.getByRole('link', { name: /^Browse all \d+ tools$/ }).click();
-	await expect(page).toHaveURL(/\/tools\?game=poe1$/);
+	await expect(page.locator('h1')).toHaveText('Path of Exile tools');
+	await expect(page.getByRole('group', { name: 'Game' }).first()).toContainText('PoE 1');
+	await expect(page.locator('a[href^="/tools/"]').first()).toBeVisible();
 });
 
-test('a game page category links to a filtered directory', async ({ page }) => {
+test('a game page filter round-trips through the URL without a game param', async ({ page }) => {
 	await page.goto('/poe1');
-	await page.getByRole('link', { name: /^Trade/ }).click();
-	await expect(page).toHaveURL(/\/tools\?game=poe1&cat=trade$/);
+	// Scoped to main: ScrollDots renders its own same-named "Trade" jump link outside it.
+	const trade = page.locator('main').getByRole('button', { name: /^Trade/ });
+	await trade.click();
+	await expect(page).toHaveURL(/\/poe1\?cat=trade$/);
+	await page.reload();
+	await expect(page.locator('main').getByRole('button', { name: /^Trade/ })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
 });
 
 test('the chooser offers both games with live counts', async ({ page }) => {
@@ -26,7 +33,7 @@ test('picking a game lands on its page and is remembered', async ({ page }) => {
 	await page.goto('/');
 	await page.getByRole('link', { name: /^Path of Exile 2 tools/ }).click();
 	await expect(page).toHaveURL(/\/poe2$/);
-	await expect(page.locator('h1')).toHaveText('Tools for Path of Exile 2');
+	await expect(page.locator('h1')).toHaveText('Path of Exile 2 tools');
 	await expect(page.evaluate(() => localStorage.getItem('exile.game'))).resolves.toBe('poe2');
 	await page.goto('/');
 	await expect(page).toHaveURL(/\/poe2$/);
@@ -99,24 +106,21 @@ test('the footer reaches the maintainers page', async ({ page }) => {
 	await expect(page.getByRole('link', { name: /juddisjudd/ })).toBeVisible();
 });
 
-test('a game page has a start-here strip and links into its filtered directory', async ({
-	page
-}) => {
+test('a game page only lists tools for that game', async ({ page }) => {
 	await page.goto('/poe2');
-	await expect(page.locator('h1')).toHaveText('Tools for Path of Exile 2');
-	await expect(page.getByRole('heading', { name: 'Start here' })).toBeVisible();
-	await expect(page.locator('a[href^="/tools/"]').first()).toBeVisible();
-	await page.getByRole('link', { name: /^Browse all \d+ tools$/ }).click();
-	await expect(page).toHaveURL(/\/tools\?game=poe2$/);
+	await expect(page.locator('h1')).toHaveText('Path of Exile 2 tools');
+	const cards = page.locator('main li.group');
+	await expect(cards.first()).toBeVisible();
+	const count = await cards.count();
+	for (let i = 0; i < count; i++) await expect(cards.nth(i)).toContainText('PoE 2');
 });
 
-test('the game page search hands the query to the directory', async ({ page }) => {
+test('the game page search filters in place', async ({ page }) => {
 	await page.goto('/poe1');
 	const search = page.getByLabel('Search tools').first();
-	await search.fill('trade');
-	await search.press('Enter');
-	await expect(page).toHaveURL(/\/tools\?game=poe1&q=trade$/);
-	await expect(page.locator('h1')).toHaveText('All tools');
+	await search.fill('awakened');
+	await expect(page).toHaveURL(/\/poe1\?q=awakened$/);
+	await expect(page.locator('main li.group')).toHaveCount(1);
 });
 
 test('the switch-game link reaches the chooser with the escape-hatch querystring', async ({
@@ -135,7 +139,7 @@ test('the pick dissolves into the game page and cleans up the transition attribu
 		.getByRole('link', { name: /^Path of Exile tools/ })
 		.click({ position: { x: 20, y: 20 } });
 	await expect(page).toHaveURL(/\/poe1$/);
-	await expect(page.locator('h1')).toHaveText('Tools for Path of Exile');
+	await expect(page.locator('h1')).toHaveText('Path of Exile tools');
 	// The scoping attribute must be cleaned up, or the rules leak into later transitions.
 	await expect(page.locator('html')).not.toHaveAttribute('data-choose-transition', /.*/);
 });

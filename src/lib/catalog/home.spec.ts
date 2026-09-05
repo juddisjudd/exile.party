@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { categoryCounts, countByGame, startHere } from './home';
+import { countByGame } from './home';
 import type { Catalog, Tool } from './schema';
 
 const tool = (over: Partial<Tool> & { id: string }): Tool => ({
@@ -40,30 +40,5 @@ const catalog: Catalog = {
 describe('countByGame', () => {
 	it('counts a tool once per game it lists', () => {
 		expect(countByGame(catalog.tools)).toEqual({ poe1: 4, poe2: 5 });
-	});
-});
-
-describe('startHere', () => {
-	it('takes the first editor pick of each category, in category order', () => {
-		expect(startHere(catalog, 'poe2').map((t) => t.id)).toEqual(['pob', 'exchange2', 'ninja']);
-	});
-
-	it('ignores picks for the other game', () => {
-		expect(startHere(catalog, 'poe1').map((t) => t.id)).toEqual(['pob', 'awakened', 'ninja']);
-	});
-
-	it('skips categories without a pick and honours the cap', () => {
-		expect(startHere(catalog, 'poe2', 2).map((t) => t.id)).toEqual(['pob', 'exchange2']);
-	});
-});
-
-describe('categoryCounts', () => {
-	it('keeps every category, with per-game counts and the description', () => {
-		expect(categoryCounts(catalog, 'poe2')).toEqual([
-			{ id: 'build', name: 'Build', description: undefined, count: 1 },
-			{ id: 'trade', name: 'Trade', description: undefined, count: 2 },
-			{ id: 'maps', name: 'Maps', description: undefined, count: 0 },
-			{ id: 'data', name: 'Data', description: 'Numbers.', count: 2 }
-		]);
 	});
 });

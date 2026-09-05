@@ -11,17 +11,9 @@
 		compact?: boolean;
 		/** On a per-game page: names the game and offers the way back to the chooser. */
 		context?: Game;
-		/** When set, Enter in the search box hands the query over instead of filtering in place. */
-		onsearch?: (query: string) => void;
 	}
 
-	let {
-		game = $bindable(null),
-		query = $bindable(''),
-		compact = false,
-		context,
-		onsearch
-	}: Props = $props();
+	let { game = $bindable(null), query = $bindable(''), compact = false, context }: Props = $props();
 
 	let search = $state<HTMLInputElement | null>(null);
 
@@ -47,12 +39,6 @@
 			query = '';
 			search?.blur();
 		}
-	}
-
-	function submit(event: KeyboardEvent) {
-		if (event.key !== 'Enter' || !onsearch) return;
-		event.preventDefault();
-		onsearch(query);
 	}
 </script>
 
@@ -132,7 +118,6 @@
 			type="search"
 			placeholder={context ? `Search ${GAME_LABEL[context]} tools` : 'Search tools'}
 			aria-label="Search tools"
-			onkeydown={submit}
 			class="h-8 w-full rounded-md border border-line bg-surface pr-9 pl-8 text-[13px] text-ink transition-colors duration-100 outline-none placeholder:text-faint focus:border-accent-line"
 		/>
 		<kbd

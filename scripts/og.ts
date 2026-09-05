@@ -131,8 +131,8 @@ async function main() {
 		...(['poe1', 'poe2'] as const).map((game) => ({
 			file: `${game}.png`,
 			html: pageCard(
-				`Tools for ${GAME_NAME[game]}`,
-				`${counts[game]} community tools for ${GAME_NAME[game]}. Every listing says what platform it runs on, what it costs, and whether the source is open.`,
+				`${GAME_NAME[game]} tools`,
+				`${counts[game]} community tools for ${GAME_NAME[game]}, filterable by category, platform, price, and licence.`,
 				GAME_NAME[game]
 			)
 		}))
