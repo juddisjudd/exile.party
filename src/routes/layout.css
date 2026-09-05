@@ -78,6 +78,15 @@
 		z-index: 9999;
 	}
 
+	/* Chooser to game page only. The default cross-fade, slowed to match the panel expansion
+	   that precedes it, and without the plus-lighter blend that washes dark art out. */
+	html[data-choose-transition]::view-transition-old(root),
+	html[data-choose-transition]::view-transition-new(root) {
+		animation-duration: 350ms;
+		animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+		mix-blend-mode: normal;
+	}
+
 	/* Hover is a border or background shift, never motion. Honour the OS setting anyway. */
 	@media (prefers-reduced-motion: reduce) {
 		*,

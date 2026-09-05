@@ -5,7 +5,7 @@
 	import type { Game } from '$lib/catalog/schema';
 	import GamePanel from '$lib/components/GamePanel.svelte';
 	import Meta from '$lib/components/Meta.svelte';
-	import { rememberGame } from '$lib/game';
+	import { rememberGame, requestReveal } from '$lib/game';
 
 	let { data } = $props();
 
@@ -14,6 +14,9 @@
 	const SEAM_TOP = 54;
 	const SEAM_BOTTOM = 46;
 	const SHIFT = 8;
+
+	/** Matches the clip-path transition in GamePanel. */
+	const EXPAND_MS = 450;
 
 	let hovered = $state<Game | null>(null);
 	let expanding = $state<Game | null>(null);
@@ -32,6 +35,20 @@
 	async function pick(game: Game, href: string) {
 		if (expanding !== null) return;
 		rememberGame(game, localStorage);
+
+		const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (still || typeof document.startViewTransition !== 'function') {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
+			await goto(href);
+			return;
+		}
+
+		// Stage one: the chosen half grows to cover the viewport while everything else fades.
+		expanding = game;
+		await new Promise((done) => setTimeout(done, EXPAND_MS));
+
+		// Stage two: the layout cross-fades this view into the game page.
+		requestReveal();
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
 		await goto(href);
 	}

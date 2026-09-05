@@ -126,3 +126,25 @@ test('the switch-game link reaches the chooser with the escape-hatch querystring
 	await page.getByRole('link', { name: 'Switch game' }).first().click();
 	await expect(page).toHaveURL(/\/\?choose$/);
 });
+
+test('the pick animates, then cleans up the transition attribute', async ({ page }) => {
+	await page.goto('/');
+	// position: see "the chooser works without JavaScript" above; the left half's bounding-box
+	// center sits on the seam, so an unqualified click there is ambiguous between the two panels.
+	await page
+		.getByRole('link', { name: /^Path of Exile tools/ })
+		.click({ position: { x: 20, y: 20 } });
+	await expect(page.locator('.chooser')).toHaveAttribute('data-expanding', 'poe1');
+	await expect(page).toHaveURL(/\/poe1$/);
+	await expect(page.locator('h1')).toHaveText('Tools for Path of Exile');
+	// The scoping attribute must be cleaned up, or the rules leak into later transitions.
+	await expect(page.locator('html')).not.toHaveAttribute('data-choose-transition', /.*/);
+});
+
+test('reduced motion skips straight to the game page', async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.goto('/');
+	await page.getByRole('link', { name: /^Path of Exile 2 tools/ }).click();
+	await expect(page).toHaveURL(/\/poe2$/);
+	await expect(page.locator('html')).not.toHaveAttribute('data-choose-transition', /.*/);
+});
