@@ -5,6 +5,7 @@ test('a game page is the directory locked to that game', async ({ page }) => {
 	await expect(page.locator('h1')).toHaveText('Path of Exile tools');
 	await expect(page.getByRole('group', { name: 'Game' }).first()).toContainText('PoE 1');
 	await expect(page.locator('a[href^="/tools/"]').first()).toBeVisible();
+	await expect(page.locator('main p.tabular-nums').first()).not.toContainText('of');
 });
 
 test('a game page filter round-trips through the URL without a game param', async ({ page }) => {

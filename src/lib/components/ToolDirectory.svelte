@@ -37,8 +37,11 @@
 	const origins: Origin[] = ['official', 'community'];
 	const codes: Code[] = ['open', 'closed'];
 
+	/** The pool this page can ever show: the whole catalog, or one game's slice when locked. */
+	const pool = $derived(lock ? catalog.tools.filter((t) => t.games.includes(lock)) : catalog.tools);
+
 	/** Nothing official is listed yet, so the filter would only offer an empty set. */
-	const hasOfficial = $derived(catalog.tools.some((t) => t.official));
+	const hasOfficial = $derived(pool.some((t) => t.official));
 
 	// svelte-ignore state_referenced_locally (lock is fixed for the life of the component: the game page keys on it.)
 	let filters = $state<Filters>({ ...EMPTY_FILTERS, game: lock ?? null });
@@ -172,8 +175,8 @@
 				<p class="text-[12.5px] text-faint tabular-nums">
 					{visible.length}
 					{visible.length === 1 ? 'tool' : 'tools'}
-					{#if visible.length !== catalog.tools.length}
-						<span class="text-faint/70">of {catalog.tools.length}</span>
+					{#if visible.length !== pool.length}
+						<span class="text-faint/70">of {pool.length}</span>
 					{/if}
 				</p>
 				{#if chips > 0}
