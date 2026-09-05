@@ -12,13 +12,11 @@
 		count: number;
 		/** The half the pointer or keyboard focus is on, if any. */
 		hovered: Game | null;
-		/** The half that was picked and is growing to fill the viewport. */
-		expanding: Game | null;
 		onhover: (game: Game | null) => void;
 		onpick: (game: Game, href: string) => void;
 	}
 
-	let { game, count, hovered, expanding, onhover, onpick }: Props = $props();
+	let { game, count, hovered, onhover, onpick }: Props = $props();
 
 	const ART = {
 		poe1: { jpg: poe1Jpg, webp: poe1Webp, line: 'The original. A decade of tools.' },
@@ -27,9 +25,8 @@
 
 	const side = $derived(game === 'poe1' ? 'left' : 'right');
 	const href = $derived(resolve('/[game=game]', { game }));
-	const hot = $derived(hovered === game || expanding === game);
+	const hot = $derived(hovered === game);
 	const dimmed = $derived(hovered !== null && hovered !== game);
-	const fading = $derived(expanding !== null && expanding !== game);
 </script>
 
 <!-- A real link: works without JS, is focusable, and hover preloads the game page. -->
@@ -41,8 +38,6 @@
 	]}
 	data-hot={hot ? '' : undefined}
 	data-dimmed={dimmed ? '' : undefined}
-	data-fading={fading ? '' : undefined}
-	data-expanding={expanding === game ? '' : undefined}
 	aria-label="{GAME_NAME[game]} tools, {count} listed"
 	onpointerenter={() => onhover(game)}
 	onpointerleave={() => onhover(null)}
@@ -115,9 +110,7 @@
 	/* Mobile first: the halves stack, seam from 52% on the left edge to 48% on the right.
 	   Every polygon keeps four points in the same order so clip-path can animate between them. */
 	.panel {
-		transition:
-			clip-path 200ms cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: clip-path 200ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 	.panel-left {
 		clip-path: polygon(0 0, 100% 0, 100% 48%, 0 52%);
@@ -125,23 +118,11 @@
 	.panel-right {
 		clip-path: polygon(0 52%, 100% 48%, 100% 100%, 0 100%);
 	}
-	.panel[data-expanding] {
-		clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-		transition-duration: 450ms;
-	}
-	.panel[data-fading] {
-		opacity: 0;
-	}
 
 	/* The image box covers only this half, so object-fit shows the intended crop. */
 	.art {
 		left: 0;
 		width: 100%;
-		transition:
-			left 450ms cubic-bezier(0.4, 0, 0.2, 1),
-			width 450ms cubic-bezier(0.4, 0, 0.2, 1),
-			top 450ms cubic-bezier(0.4, 0, 0.2, 1),
-			height 450ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 	.panel-left .art {
 		top: 0;
@@ -161,11 +142,6 @@
 			rgb(20 22 25 / 0.14) 64%,
 			rgb(20 22 25 / 0.55) 100%
 		);
-		transition:
-			left 450ms cubic-bezier(0.4, 0, 0.2, 1),
-			width 450ms cubic-bezier(0.4, 0, 0.2, 1),
-			top 450ms cubic-bezier(0.4, 0, 0.2, 1),
-			height 450ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 	/* The shade box covers only this half, matching .art's geometry, so each half darkens
 	   towards its own bottom edge instead of the gradient spanning the full stacked anchor. */
@@ -178,14 +154,6 @@
 		height: 52%;
 	}
 
-	/* Below md, an expanding panel's art and shade grow to fill the full height too, so the
-	   expand animation does not leave the boxed-in other half of the stack empty. */
-	.panel[data-expanding] .art,
-	.panel[data-expanding] .shade {
-		top: 0;
-		height: 100%;
-	}
-
 	.label {
 		transition: opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
@@ -194,9 +162,6 @@
 	   the seam, inside the top half. */
 	.panel-left .label {
 		bottom: calc(48% + 1.5rem);
-	}
-	.panel[data-expanding] .label {
-		opacity: 0;
 	}
 
 	img {
@@ -235,9 +200,6 @@
 		.panel-right {
 			clip-path: polygon(var(--seam-top) 0, 100% 0, 100% 100%, var(--seam-bottom) 100%);
 		}
-		.panel[data-expanding] {
-			clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-		}
 		.panel-left .art,
 		.panel-right .art {
 			top: 0;
@@ -258,10 +220,6 @@
 		.panel-right .art {
 			left: 38%;
 			width: 62%;
-		}
-		.panel[data-expanding] .art {
-			left: 0;
-			width: 100%;
 		}
 	}
 </style>

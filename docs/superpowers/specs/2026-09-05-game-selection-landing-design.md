@@ -106,23 +106,25 @@ On click, with JS:
 
 1. `rememberGame(game)`.
 2. If `prefers-reduced-motion: reduce` or `document.startViewTransition` is missing:
-   `goto(href)` and stop.
-3. Set `expanding = game`. CSS transitions run for 450ms with
-   `cubic-bezier(0.4, 0, 0.2, 1)`: the chosen panel's `clip-path` becomes the full
-   rectangle, the other panel, the headline block and both labels fade to 0. Wait
-   450ms (the transition duration) on a timer.
-4. Call `requestReveal()` in `game.ts`, then `goto(href)`.
-5. `+layout.svelte` registers `onNavigate`. When `takeReveal()` returns true it
+   `goto(href, { replaceState: true })` and stop — no transition at all.
+3. Otherwise call `requestReveal()` in `game.ts`, then `goto(href, { replaceState: true })`.
+   There is no expand stage on the chooser itself; the click hands straight off to the
+   navigation.
+4. `+layout.svelte` registers `onNavigate`. When `takeReveal()` returns true it
    sets `data-choose-transition` on `<html>`, and wraps the navigation in
    `document.startViewTransition` using the SvelteKit-documented pattern (resolve inside
    the callback, then `await navigation.complete`). `transition.finished` removes the
    attribute. Every other navigation is untouched.
-6. `layout.css`: under `html[data-choose-transition]`, `::view-transition-old(root)` fades
-   out and `::view-transition-new(root)` fades in over 350ms, `mix-blend-mode: normal`,
-   the same scoping trick the theme reveal uses with `data-theme-transition`.
+5. `layout.css`: under `html[data-choose-transition]`, `::view-transition-new(root)` gets no
+   animation and sits underneath (`z-index: 1`) so the game page is rendered solid from the
+   first frame, as if it had been there all along. `::view-transition-old(root)` sits above
+   it (`z-index: 2`) and dissolves away over 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`: opacity
+   to 0 and a slight zoom, `scale(1.04)`. Both keep `mix-blend-mode: normal`, the same
+   scoping trick the theme reveal uses with `data-theme-transition`.
 
-Total about 800ms. Back navigation from the game page to `/` shows the chooser only via
-`?choose`; a plain `/` redirects again, which is the intended memory behaviour.
+Total about 700ms — one motion, not two. Back navigation from the game page to `/` shows
+the chooser only via `?choose`; a plain `/` redirects again, which is the intended memory
+behaviour.
 
 ## Per-game page
 

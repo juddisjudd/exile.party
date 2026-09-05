@@ -15,11 +15,8 @@
 	const SEAM_BOTTOM = 46;
 	const SHIFT = 8;
 
-	/** Matches the clip-path transition in GamePanel. */
-	const EXPAND_MS = 450;
-
 	let hovered = $state<Game | null>(null);
-	let expanding = $state<Game | null>(null);
+	let picking = $state(false);
 
 	const shift = $derived(hovered === 'poe2' ? -SHIFT : hovered === 'poe1' ? SHIFT : 0);
 	const seamTop = $derived(SEAM_TOP + shift);
@@ -29,33 +26,24 @@
 	const canHover = browser && matchMedia('(hover: hover)').matches;
 
 	function hover(game: Game | null) {
-		if (canHover && expanding === null) hovered = game;
+		if (canHover && !picking) hovered = game;
 	}
 
 	async function pick(game: Game, href: string) {
-		if (expanding !== null) return;
+		if (picking) return;
+		picking = true;
 		rememberGame(game, gameStore());
 
 		const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (still || typeof document.startViewTransition !== 'function') {
-			// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
-			await goto(href, { replaceState: true });
-			return;
-		}
+		if (!still && typeof document.startViewTransition === 'function') requestReveal();
 
-		// Stage one: the chosen half grows to cover the viewport while everything else fades.
-		expanding = game;
-		await new Promise((done) => setTimeout(done, EXPAND_MS));
-
-		// Stage two: the layout cross-fades this view into the game page.
-		requestReveal();
 		try {
 			// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
 			await goto(href, { replaceState: true });
 		} catch {
-			// The reveal never happened: clear the flag so the next unrelated navigation doesn't inherit it.
+			// A failed navigation hands the chooser back rather than leaving it half picked.
 			takeReveal();
-			expanding = null;
+			picking = false;
 		}
 	}
 </script>
@@ -72,7 +60,6 @@
 <div
 	class="chooser relative flex min-h-dvh flex-col overflow-hidden bg-canvas text-ink"
 	data-force-theme="dark"
-	data-expanding={expanding ?? undefined}
 	style:--seam-top="{seamTop}%"
 	style:--seam-bottom="{seamBottom}%"
 >
@@ -121,22 +108,8 @@
 	</div>
 
 	<div class="relative min-h-[560px] flex-1 md:absolute md:inset-0 md:min-h-0">
-		<GamePanel
-			game="poe1"
-			count={data.counts.poe1}
-			{hovered}
-			{expanding}
-			onhover={hover}
-			onpick={pick}
-		/>
-		<GamePanel
-			game="poe2"
-			count={data.counts.poe2}
-			{hovered}
-			{expanding}
-			onhover={hover}
-			onpick={pick}
-		/>
+		<GamePanel game="poe1" count={data.counts.poe1} {hovered} onhover={hover} onpick={pick} />
+		<GamePanel game="poe2" count={data.counts.poe2} {hovered} onhover={hover} onpick={pick} />
 
 		<div class="seam pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
@@ -165,9 +138,7 @@
 			100% calc(48% + 0.5px),
 			0 calc(52% + 0.5px)
 		);
-		transition:
-			clip-path 200ms cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: clip-path 200ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 	@variant md {
 		.seam {
@@ -192,14 +163,5 @@
 			rgb(20 22 25 / 0.42) 46%,
 			rgb(20 22 25 / 0) 72%
 		);
-	}
-
-	.band,
-	.credit,
-	.glow {
-		transition: opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-	.chooser[data-expanding] :is(.band, .seam, .credit, .glow) {
-		opacity: 0;
 	}
 </style>
