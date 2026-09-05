@@ -15,26 +15,26 @@ animates the chosen half open and lands on a per-game home page. Two personas:
 
 Decisions already taken (in conversation, 2026-09-05):
 
-| Question              | Decision                                                                 |
-| --------------------- | ------------------------------------------------------------------------ |
-| Destination           | New `/poe1` and `/poe2` pages holding today's home content, scoped       |
-| Split shape           | Shallow diagonal, full-bleed, about 7 degrees off vertical               |
+| Question              | Decision                                                                  |
+| --------------------- | ------------------------------------------------------------------------- |
+| Destination           | New `/poe1` and `/poe2` pages holding today's home content, scoped        |
+| Split shape           | Shallow diagonal, full-bleed, about 7 degrees off vertical                |
 | Art                   | Official GGG wallpaper art, artwork only, logos cropped out, GGG credited |
-| Theme on the chooser  | Always dark; destination honours the user's theme                        |
-| Hover                 | Modest: seam shifts 8%, other half dims                                  |
-| Memory                | Remember the pick and auto-redirect `/` to it                            |
-| Side copy             | Game label, one-liner, live tool count                                   |
-| Nudge for new players | Omitted                                                                  |
+| Theme on the chooser  | Always dark; destination honours the user's theme                         |
+| Hover                 | Modest: seam shifts 8%, other half dims                                   |
+| Memory                | Remember the pick and auto-redirect `/` to it                             |
+| Side copy             | Game label, one-liner, live tool count                                    |
+| Nudge for new players | Omitted                                                                   |
 
 ## Routes
 
-| Route                | Change                                                                                 |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| `/`                  | Becomes the chooser. Keeps the SEO title and description the home page has today.     |
-| `/?choose`           | Same page; the querystring only suppresses the redirect below.                         |
-| `/poe1`, `/poe2`     | New. `src/routes/[game=game]/` with a `src/params/game.ts` matcher and `entries()`.    |
-| `/tools`             | Unchanged. The chooser's "Browse all tools" link points here with no game filter.      |
-| `/tools/[id]`, `/maintainers` | Unchanged.                                                                    |
+| Route                         | Change                                                                              |
+| ----------------------------- | ----------------------------------------------------------------------------------- |
+| `/`                           | Becomes the chooser. Keeps the SEO title and description the home page has today.   |
+| `/?choose`                    | Same page; the querystring only suppresses the redirect below.                      |
+| `/poe1`, `/poe2`              | New. `src/routes/[game=game]/` with a `src/params/game.ts` matcher and `entries()`. |
+| `/tools`                      | Unchanged. The chooser's "Browse all tools" link points here with no game filter.   |
+| `/tools/[id]`, `/maintainers` | Unchanged.                                                                          |
 
 Today's `/` content (hero, category list for both games) is retired. Its pieces move to
 the per-game page.

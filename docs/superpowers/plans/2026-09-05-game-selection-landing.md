@@ -27,38 +27,40 @@
 
 ## File Structure
 
-| File | Responsibility |
-| --- | --- |
-| `src/lib/catalog/home.ts` (new) | Pure helpers: `countByGame`, `startHere`, `categoryCounts`. Safe on server and client. |
-| `src/lib/catalog/home.spec.ts` (new) | Unit tests for the above with an inline fixture. |
-| `src/lib/catalog/display.ts` (modify) | Add `GAME_NAME` next to `GAME_LABEL`. |
-| `src/lib/game.ts` (new) | `GAME_KEY`, `rememberGame`, `requestReveal`, `takeReveal`. No runes, no DOM at import time. |
-| `src/lib/game.spec.ts` (new) | Unit tests for `game.ts`. |
-| `src/params/game.ts` (new) | Param matcher: `poe1` or `poe2`. |
-| `src/routes/[game=game]/+page.server.ts` (new) | `entries()` for both games; load returns counts, start-here picks, category counts. |
-| `src/routes/[game=game]/+page.svelte` (new) | Per-game home: hero, Start here, categories, footer. |
-| `src/lib/components/TopBar.svelte` (modify) | New `context` and `onsearch` props. |
-| `scripts/og.ts` (modify) | Two more page cards, `poe1.png` and `poe2.png`. |
-| `src/lib/styles/tokens.css` (modify) | Dark token block also applies under `[data-force-theme='dark']`. |
-| `src/lib/assets/chooser/poe{1,2}.{jpg,webp}` (new) | The artwork. |
-| `src/lib/components/GamePanel.svelte` (new) | One clipped half: art, shade, label, hover and expand states. |
-| `src/routes/+page.server.ts` (modify) | Returns per-game counts only. |
-| `src/routes/+page.svelte` (modify) | The chooser. Owns seam geometry, hover and expanding state, the pick handler. |
-| `src/app.html` (modify) | Redirect script. |
-| `src/routes/+layout.svelte` (modify) | `onNavigate` view transition when a reveal was requested. |
-| `src/routes/layout.css` (modify) | `html[data-choose-transition]` cross-fade rules. |
-| `e2e/site.e2e.ts` (modify) | Old home tests move to `/poe1`; chooser, redirect and transition tests added. |
+| File                                               | Responsibility                                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `src/lib/catalog/home.ts` (new)                    | Pure helpers: `countByGame`, `startHere`, `categoryCounts`. Safe on server and client.      |
+| `src/lib/catalog/home.spec.ts` (new)               | Unit tests for the above with an inline fixture.                                            |
+| `src/lib/catalog/display.ts` (modify)              | Add `GAME_NAME` next to `GAME_LABEL`.                                                       |
+| `src/lib/game.ts` (new)                            | `GAME_KEY`, `rememberGame`, `requestReveal`, `takeReveal`. No runes, no DOM at import time. |
+| `src/lib/game.spec.ts` (new)                       | Unit tests for `game.ts`.                                                                   |
+| `src/params/game.ts` (new)                         | Param matcher: `poe1` or `poe2`.                                                            |
+| `src/routes/[game=game]/+page.server.ts` (new)     | `entries()` for both games; load returns counts, start-here picks, category counts.         |
+| `src/routes/[game=game]/+page.svelte` (new)        | Per-game home: hero, Start here, categories, footer.                                        |
+| `src/lib/components/TopBar.svelte` (modify)        | New `context` and `onsearch` props.                                                         |
+| `scripts/og.ts` (modify)                           | Two more page cards, `poe1.png` and `poe2.png`.                                             |
+| `src/lib/styles/tokens.css` (modify)               | Dark token block also applies under `[data-force-theme='dark']`.                            |
+| `src/lib/assets/chooser/poe{1,2}.{jpg,webp}` (new) | The artwork.                                                                                |
+| `src/lib/components/GamePanel.svelte` (new)        | One clipped half: art, shade, label, hover and expand states.                               |
+| `src/routes/+page.server.ts` (modify)              | Returns per-game counts only.                                                               |
+| `src/routes/+page.svelte` (modify)                 | The chooser. Owns seam geometry, hover and expanding state, the pick handler.               |
+| `src/app.html` (modify)                            | Redirect script.                                                                            |
+| `src/routes/+layout.svelte` (modify)               | `onNavigate` view transition when a reveal was requested.                                   |
+| `src/routes/layout.css` (modify)                   | `html[data-choose-transition]` cross-fade rules.                                            |
+| `e2e/site.e2e.ts` (modify)                         | Old home tests move to `/poe1`; chooser, redirect and transition tests added.               |
 
 ---
 
 ### Task 1: Catalog helpers for the per-game pages
 
 **Files:**
+
 - Create: `src/lib/catalog/home.ts`
 - Create: `src/lib/catalog/home.spec.ts`
 - Modify: `src/lib/catalog/display.ts` (after the `GAME_LABEL` line)
 
 **Interfaces:**
+
 - Consumes: `Catalog`, `Game`, `Tool` types from `src/lib/catalog/schema.ts`.
 - Produces:
   - `countByGame(tools: readonly Tool[]): Record<Game, number>`
@@ -219,10 +221,12 @@ git commit -m "Add per-game catalog helpers"
 ### Task 2: Game memory and the reveal flag
 
 **Files:**
+
 - Create: `src/lib/game.ts`
 - Create: `src/lib/game.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `Game` type from `src/lib/catalog/schema.ts`.
 - Produces:
   - `GAME_KEY = 'exile.game'`
@@ -343,6 +347,7 @@ git commit -m "Add game memory and reveal flag"
 ### Task 3: Per-game home page at /poe1 and /poe2
 
 **Files:**
+
 - Create: `src/params/game.ts`
 - Create: `src/routes/[game=game]/+page.server.ts`
 - Create: `src/routes/[game=game]/+page.svelte`
@@ -351,6 +356,7 @@ git commit -m "Add game memory and reveal flag"
 - Modify: `e2e/site.e2e.ts` (append two tests)
 
 **Interfaces:**
+
 - Consumes: `startHere`, `categoryCounts` from Task 1; `GAME_NAME` from `display.ts`; `Game` zod enum and type from `schema.ts`; `loadCatalog` from `$lib/server/catalog`; `ToolCard`, `HeroOcean`, `SiteFooter`, `Meta`, `submitDialog` as they exist today.
 - Produces: routes `/poe1` and `/poe2`; `TopBar` props `context?: Game` and `onsearch?: (query: string) => void`.
 
@@ -499,7 +505,11 @@ Replace the whole of `src/lib/components/TopBar.svelte` with:
 				aria-hidden="true"
 				class="size-3.5"
 			>
-				<path d="M3 5.5h9l-2.5-2.5M13 10.5H4l2.5 2.5" stroke-linecap="round" stroke-linejoin="round" />
+				<path
+					d="M3 5.5h9l-2.5-2.5M13 10.5H4l2.5 2.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
 			</svg>
 			Switch game
 		</a>
@@ -792,6 +802,7 @@ git commit -m "Add per-game home pages at /poe1 and /poe2"
 ### Task 4: The chooser at /, with memory and redirect
 
 **Files:**
+
 - Modify: `src/lib/styles/tokens.css` (the `:root[data-theme='dark']` selector)
 - Create: `src/lib/assets/chooser/poe1.jpg`, `poe1.webp`, `poe2.jpg`, `poe2.webp` (copied)
 - Create: `src/lib/components/GamePanel.svelte`
@@ -801,6 +812,7 @@ git commit -m "Add per-game home pages at /poe1 and /poe2"
 - Modify: `e2e/site.e2e.ts` (move old home tests, add chooser tests)
 
 **Interfaces:**
+
 - Consumes: `countByGame` (Task 1), `rememberGame` (Task 2), `GAME_NAME` (Task 1), route `/[game=game]` (Task 3).
 - Produces: `GamePanel` props `{ game: Game; count: number; hovered: Game | null; expanding: Game | null; onhover: (game: Game | null) => void; onpick: (game: Game, href: string) => void }`. The chooser sets CSS custom properties `--seam-top` and `--seam-bottom` (percent strings) and `data-expanding` on its root. Task 5 fills in the `expanding` behaviour; in this task it stays `null`.
 
@@ -927,7 +939,7 @@ Create `src/lib/components/GamePanel.svelte`:
 				: 'flex-row-reverse'}"
 		>
 			<span
-				class="ring grid size-[30px] place-items-center rounded-full border border-line-strong bg-canvas/35 text-muted transition-colors duration-200 md:size-9"
+				class="grid size-[30px] place-items-center rounded-full border border-line-strong bg-canvas/35 text-muted ring transition-colors duration-200 md:size-9"
 				aria-hidden="true"
 			>
 				<svg
@@ -941,7 +953,8 @@ Create `src/lib/components/GamePanel.svelte`:
 				</svg>
 			</span>
 			<span class="hidden md:inline">Select</span>
-			<span class="hidden size-[3px] rounded-full bg-faint md:inline-block" aria-hidden="true"></span>
+			<span class="hidden size-[3px] rounded-full bg-faint md:inline-block" aria-hidden="true"
+			></span>
 			<span class="text-faint tabular-nums">{count} tools</span>
 		</span>
 	</div>
@@ -1121,7 +1134,9 @@ Replace the whole of `src/routes/+page.svelte` with:
      carries the brand into social cards. -->
 <Meta
 	title="Curated directory of Path of Exile 1 & 2 third-party tools"
-	description="A curated directory of {data.counts.poe1 + data.counts.poe2} third-party tools for Path of Exile 1 and 2. Pick your game, then browse by category, platform, price, and whether the source is open."
+	description="A curated directory of {data.counts.poe1 +
+		data.counts
+			.poe2} third-party tools for Path of Exile 1 and 2. Pick your game, then browse by category, platform, price, and whether the source is open."
 	image="home.png"
 	path="/"
 />
@@ -1178,8 +1193,22 @@ Replace the whole of `src/routes/+page.svelte` with:
 	</div>
 
 	<div class="relative min-h-[560px] flex-1 md:absolute md:inset-0 md:min-h-0">
-		<GamePanel game="poe1" count={data.counts.poe1} {hovered} {expanding} onhover={hover} onpick={pick} />
-		<GamePanel game="poe2" count={data.counts.poe2} {hovered} {expanding} onhover={hover} onpick={pick} />
+		<GamePanel
+			game="poe1"
+			count={data.counts.poe1}
+			{hovered}
+			{expanding}
+			onhover={hover}
+			onpick={pick}
+		/>
+		<GamePanel
+			game="poe2"
+			count={data.counts.poe2}
+			{hovered}
+			{expanding}
+			onhover={hover}
+			onpick={pick}
+		/>
 
 		<!-- Percent coordinates so the seam follows the same numbers the panels clip on. -->
 		<svg class="seam pointer-events-none absolute inset-0 size-full" aria-hidden="true">
@@ -1187,7 +1216,10 @@ Replace the whole of `src/routes/+page.svelte` with:
 			<line class="md:hidden" x1="0" y1="52%" x2="100%" y2="48%" />
 		</svg>
 
-		<div class="glow pointer-events-none absolute left-1/2 hidden md:block" aria-hidden="true"></div>
+		<div
+			class="glow pointer-events-none absolute left-1/2 hidden md:block"
+			aria-hidden="true"
+		></div>
 	</div>
 
 	<p
@@ -1235,20 +1267,20 @@ Replace the whole of `src/routes/+page.svelte` with:
 In `src/app.html`, directly after the closing `</script>` of the theme script (still inside `<head>`, before `%sveltekit.head%`), add:
 
 ```html
-		<script>
-			// Runs before first paint: a remembered game skips the chooser. `?choose` shows it anyway.
-			// Keep in sync with GAME_KEY in src/lib/game.ts.
-			(() => {
-				if (location.pathname !== '/') return;
-				if (new URLSearchParams(location.search).has('choose')) return;
-				try {
-					const game = localStorage.getItem('exile.game');
-					if (game === 'poe1' || game === 'poe2') location.replace('/' + game);
-				} catch {
-					/* private mode */
-				}
-			})();
-		</script>
+<script>
+	// Runs before first paint: a remembered game skips the chooser. `?choose` shows it anyway.
+	// Keep in sync with GAME_KEY in src/lib/game.ts.
+	(() => {
+		if (location.pathname !== '/') return;
+		if (new URLSearchParams(location.search).has('choose')) return;
+		try {
+			const game = localStorage.getItem('exile.game');
+			if (game === 'poe1' || game === 'poe2') location.replace('/' + game);
+		} catch {
+			/* private mode */
+		}
+	})();
+</script>
 ```
 
 - [ ] **Step 7: Move the old home tests and add the chooser tests**
@@ -1324,12 +1356,14 @@ git commit -m "Replace the home page with a game chooser"
 ### Task 5: The reveal transition
 
 **Files:**
+
 - Modify: `src/routes/+page.svelte` (the `pick` function)
 - Modify: `src/routes/+layout.svelte` (script block)
 - Modify: `src/routes/layout.css` (after the theme-transition rules)
 - Modify: `e2e/site.e2e.ts` (append two tests)
 
 **Interfaces:**
+
 - Consumes: `requestReveal`, `takeReveal` (Task 2); `expanding` state and `data-expanding` styling (Task 4).
 - Produces: `html[data-choose-transition]` attribute for the duration of the cross-fade.
 
@@ -1338,43 +1372,43 @@ git commit -m "Replace the home page with a game chooser"
 In `src/routes/+page.svelte`, change the import line
 
 ```ts
-	import { rememberGame } from '$lib/game';
+import { rememberGame } from '$lib/game';
 ```
 
 to
 
 ```ts
-	import { rememberGame, requestReveal } from '$lib/game';
+import { rememberGame, requestReveal } from '$lib/game';
 ```
 
 add, under the `SHIFT` constant:
 
 ```ts
-	/** Matches the clip-path transition in GamePanel. */
-	const EXPAND_MS = 450;
+/** Matches the clip-path transition in GamePanel. */
+const EXPAND_MS = 450;
 ```
 
 and replace the `pick` function with:
 
 ```ts
-	async function pick(game: Game, href: string) {
-		if (expanding !== null) return;
-		rememberGame(game, localStorage);
+async function pick(game: Game, href: string) {
+	if (expanding !== null) return;
+	rememberGame(game, localStorage);
 
-		const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (still || typeof document.startViewTransition !== 'function') {
-			await goto(href);
-			return;
-		}
-
-		// Stage one: the chosen half grows to cover the viewport while everything else fades.
-		expanding = game;
-		await new Promise((done) => setTimeout(done, EXPAND_MS));
-
-		// Stage two: the layout cross-fades this view into the game page.
-		requestReveal();
+	const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+	if (still || typeof document.startViewTransition !== 'function') {
 		await goto(href);
+		return;
 	}
+
+	// Stage one: the chosen half grows to cover the viewport while everything else fades.
+	expanding = game;
+	await new Promise((done) => setTimeout(done, EXPAND_MS));
+
+	// Stage two: the layout cross-fades this view into the game page.
+	requestReveal();
+	await goto(href);
+}
 ```
 
 - [ ] **Step 2: Wrap that one navigation in a view transition**
@@ -1417,14 +1451,14 @@ The markup below the script block stays exactly as it is.
 In `src/routes/layout.css`, directly after the `html[data-theme-transition]::view-transition-new(root) { z-index: 9999; }` rule and before the reduced-motion block, add:
 
 ```css
-	/* Chooser to game page only. The default cross-fade, slowed to match the panel expansion
+/* Chooser to game page only. The default cross-fade, slowed to match the panel expansion
 	   that precedes it, and without the plus-lighter blend that washes dark art out. */
-	html[data-choose-transition]::view-transition-old(root),
-	html[data-choose-transition]::view-transition-new(root) {
-		animation-duration: 350ms;
-		animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-		mix-blend-mode: normal;
-	}
+html[data-choose-transition]::view-transition-old(root),
+html[data-choose-transition]::view-transition-new(root) {
+	animation-duration: 350ms;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	mix-blend-mode: normal;
+}
 ```
 
 - [ ] **Step 4: Add the e2e tests**
