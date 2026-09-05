@@ -119,6 +119,22 @@ async function main() {
 				'The people who keep this directory running. Anyone can add a listing by pull request.',
 				''
 			)
+		},
+		{
+			file: 'poe1.png',
+			html: pageCard(
+				'Tools for Path of Exile',
+				`${catalog.tools.filter((t) => t.games.includes('poe1')).length} community tools for Path of Exile. Every listing says what platform it runs on, what it costs, and whether the source is open.`,
+				'Path of Exile'
+			)
+		},
+		{
+			file: 'poe2.png',
+			html: pageCard(
+				'Tools for Path of Exile 2',
+				`${catalog.tools.filter((t) => t.games.includes('poe2')).length} community tools for Path of Exile 2. Every listing says what platform it runs on, what it costs, and whether the source is open.`,
+				'Path of Exile 2'
+			)
 		}
 	];
 
