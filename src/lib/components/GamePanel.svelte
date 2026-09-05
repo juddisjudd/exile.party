@@ -59,7 +59,7 @@
 			src={ART[game].jpg}
 			alt=""
 			class="size-full object-cover"
-			style:object-position={side === 'left' ? '40% 50%' : '60% 50%'}
+			style:object-position={side === 'left' ? '40% 50%' : '45% 50%'}
 			loading="eager"
 			fetchpriority="high"
 			decoding="async"
@@ -157,9 +157,25 @@
 			rgb(20 22 25 / 0.55) 100%
 		);
 	}
+	/* The shade box covers only this half, matching .art's geometry, so each half darkens
+	   towards its own bottom edge instead of the gradient spanning the full stacked anchor. */
+	.panel-left .shade {
+		top: 0;
+		height: 52%;
+	}
+	.panel-right .shade {
+		top: 48%;
+		height: 52%;
+	}
 
 	.label {
 		transition: opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	/* The left half's label sits at the bottom of the full-height anchor by default, which is
+	   outside .panel-left's clip polygon on the stacked mobile layout. Pull it up to just above
+	   the seam, inside the top half. */
+	.panel-left .label {
+		bottom: calc(48% + 1.5rem);
 	}
 	.panel[data-expanding] .label {
 		opacity: 0;
@@ -200,6 +216,14 @@
 		.panel-right .art {
 			top: 0;
 			height: 100%;
+		}
+		.panel-left .shade,
+		.panel-right .shade {
+			top: 0;
+			height: 100%;
+		}
+		.panel-left .label {
+			bottom: 4rem;
 		}
 		.panel-left .art {
 			left: 0;
