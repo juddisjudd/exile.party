@@ -3,6 +3,24 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f5" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141619" />
+		<script>
+			// Runs before first paint so an explicit Light/Dark choice never flashes the other theme.
+			// Keep in sync with THEME_KEY in src/lib/theme.svelte.ts.
+			(() => {
+				let choice = 'system';
+				try {
+					const stored = localStorage.getItem('exile.theme');
+					if (stored === 'light' || stored === 'dark') choice = stored;
+				} catch {
+					/* private mode */
+				}
+				const el = document.documentElement;
+				el.dataset.themeChoice = choice;
+				if (choice !== 'system') el.dataset.theme = choice;
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

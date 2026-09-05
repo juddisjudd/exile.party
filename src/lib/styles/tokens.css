@@ -1,0 +1,104 @@
+/* Every colour in the site resolves through these tokens. Change a value here, not in a component.
+   Light and dark are authored separately: same token names, independently chosen values. */
+
+:root {
+	color-scheme: light;
+
+	--canvas: #f7f7f5;
+	--surface: #ffffff;
+	--surface-hover: #f1f1ef;
+	--raised: #ecece9;
+
+	--line: rgb(0 0 0 / 0.08);
+	--line-strong: rgb(0 0 0 / 0.14);
+
+	--ink: #141619;
+	--muted: #5b5d66;
+	--faint: #6e7079;
+
+	--accent: #0a21c0;
+	--accent-strong: #050a44;
+	--accent-fill: #0a21c0;
+	--accent-on-fill: #ffffff;
+	--accent-tint: #e9ecfb;
+	--accent-line: rgb(10 33 192 / 0.28);
+}
+
+/* System preference. Loses to an explicit [data-theme] choice in either direction. */
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		color-scheme: dark;
+
+		--canvas: #141619;
+		--surface: #191c21;
+		--surface-hover: #1f232a;
+		--raised: #2c2e3a;
+
+		--line: rgb(255 255 255 / 0.08);
+		--line-strong: rgb(255 255 255 / 0.14);
+
+		--ink: #eceded;
+		--muted: #b3b4bd;
+		--faint: #82848f;
+
+		/* #0a21c0 is 1.7:1 on this canvas, so the brand blue stays a fill only
+		   and text/borders use a lighter tint of the same hue (6.1:1). */
+		--accent: #7b8ff0;
+		--accent-strong: #97a7f7;
+		--accent-fill: #0a21c0;
+		--accent-on-fill: #ffffff;
+		--accent-tint: #050a44;
+		--accent-line: rgb(123 143 240 / 0.35);
+	}
+}
+
+:root[data-theme='dark'] {
+	color-scheme: dark;
+
+	--canvas: #141619;
+	--surface: #191c21;
+	--surface-hover: #1f232a;
+	--raised: #2c2e3a;
+
+	--line: rgb(255 255 255 / 0.08);
+	--line-strong: rgb(255 255 255 / 0.14);
+
+	--ink: #eceded;
+	--muted: #b3b4bd;
+	--faint: #82848f;
+
+	--accent: #7b8ff0;
+	--accent-strong: #97a7f7;
+	--accent-fill: #0a21c0;
+	--accent-on-fill: #ffffff;
+	--accent-tint: #050a44;
+	--accent-line: rgb(123 143 240 / 0.35);
+}
+
+/* `inline` keeps the utilities pointing at the vars above so a theme swap is a
+   variable change, not a rebuild of every class. */
+@theme inline {
+	--color-canvas: var(--canvas);
+	--color-surface: var(--surface);
+	--color-surface-hover: var(--surface-hover);
+	--color-raised: var(--raised);
+
+	--color-line: var(--line);
+	--color-line-strong: var(--line-strong);
+
+	--color-ink: var(--ink);
+	--color-muted: var(--muted);
+	--color-faint: var(--faint);
+
+	--color-accent: var(--accent);
+	--color-accent-strong: var(--accent-strong);
+	--color-accent-fill: var(--accent-fill);
+	--color-accent-on-fill: var(--accent-on-fill);
+	--color-accent-tint: var(--accent-tint);
+	--color-accent-line: var(--accent-line);
+
+	--font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+	--radius-row: 0.5rem;
+}

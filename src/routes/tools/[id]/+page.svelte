@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import Meta from '$lib/components/Meta.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
+	import TopBar from '$lib/components/TopBar.svelte';
 	import { isStale } from '$lib/catalog/filter';
 
 	let { data } = $props();
@@ -7,12 +10,20 @@
 	const stale = $derived(isStale(tool.lastVerified, data.builtAt));
 </script>
 
-<svelte:head>
-	<title>{tool.name} · PoE Tool List</title>
-</svelte:head>
+<Meta
+	title="{tool.name} · exile.party"
+	description={tool.description}
+	image="tool-{tool.id}.png"
+	path="/tools/{tool.id}"
+/>
 
-<main>
-	<a href={resolve('/')}>All tools</a>
+<TopBar compact />
+
+<main class="mx-auto w-full max-w-[1180px] flex-1 px-4 py-10 sm:px-6">
+	<a
+		href={resolve('/tools')}
+		class="text-[13px] text-muted transition-colors duration-100 hover:text-ink">&larr; All tools</a
+	>
 	<h1>{tool.name}</h1>
 	<p>{tool.description}</p>
 
@@ -54,3 +65,5 @@
 		<p>{tool.notes}</p>
 	{/if}
 </main>
+
+<SiteFooter />
