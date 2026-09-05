@@ -41,8 +41,10 @@ the per-game page.
 
 ## Remembering the pick
 
-- `src/lib/game.svelte.ts`: `GAME_KEY = 'exile.game'`, `rememberGame(game)`,
-  `readGame(): Game | null`. Same try/catch shape as `theme.svelte.ts`.
+- `src/lib/game.ts`: `GAME_KEY = 'exile.game'` and `rememberGame(game, store)`, where
+  `store` is the `getItem`/`setItem` subset of `Storage` so tests pass a plain object.
+  Same try/catch shape as `theme.svelte.ts`. Nothing reads the value from the app; the
+  inline script below is the only reader.
 - `src/app.html` gains a second inline script, before paint: if `location.pathname`
   is `/` and the querystring does not contain `choose` and the stored value is `poe1`
   or `poe2`, `location.replace('/' + game)`. The key is duplicated there with a keep-in-sync
@@ -83,8 +85,8 @@ Layout, desktop (from the canvas, Direction A):
   transitions 200ms. The headline does not move.
 
 Layout, below `md`: a canvas-coloured band at the top holds the brand and the headline
-block. The two halves stack beneath it, the diagonal kept between them, labels inside
-each half. No hover effects.
+block. The two halves stack beneath it, the diagonal kept between them (from 52% on the
+left edge to 48% on the right), labels inside each half. No hover effects.
 
 Always dark: `tokens.css` gains `[data-force-theme='dark']` alongside
 `:root[data-theme='dark']` in the explicit-dark block, so a wrapper element re-declares the
@@ -105,10 +107,10 @@ On click, with JS:
    `goto(href)` and stop.
 3. Set `expanding = game`. CSS transitions run for 450ms with
    `cubic-bezier(0.4, 0, 0.2, 1)`: the chosen panel's `clip-path` becomes the full
-   rectangle, the other panel, the headline block and both labels fade to 0. Wait for
-   `transitionend` on the chosen panel, with a 500ms timer as fallback.
-4. Set `pendingReveal = true` in `game.svelte.ts`, then `goto(href)`.
-5. `+layout.svelte` registers `onNavigate`. When `pendingReveal` is set it clears it,
+   rectangle, the other panel, the headline block and both labels fade to 0. Wait
+   450ms (the transition duration) on a timer.
+4. Call `requestReveal()` in `game.ts`, then `goto(href)`.
+5. `+layout.svelte` registers `onNavigate`. When `takeReveal()` returns true it
    sets `data-choose-transition` on `<html>`, and wraps the navigation in
    `document.startViewTransition` using the SvelteKit-documented pattern (resolve inside
    the callback, then `await navigation.complete`). `transition.finished` removes the
