@@ -15,4 +15,7 @@
 	path="/{data.game}"
 />
 
-<ToolDirectory catalog={data.catalog} builtAt={data.builtAt} lock={data.game} />
+<!-- Keyed on the game: the route is shared, so a param change must remount, not update. -->
+{#key data.game}
+	<ToolDirectory catalog={data.catalog} builtAt={data.builtAt} lock={data.game} />
+{/key}

@@ -40,6 +40,7 @@
 	/** Nothing official is listed yet, so the filter would only offer an empty set. */
 	const hasOfficial = $derived(catalog.tools.some((t) => t.official));
 
+	// svelte-ignore state_referenced_locally (lock is fixed for the life of the component: the game page keys on it.)
 	let filters = $state<Filters>({ ...EMPTY_FILTERS, game: lock ?? null });
 	let synced = $state(false);
 

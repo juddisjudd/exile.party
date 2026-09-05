@@ -198,4 +198,10 @@ test('back from a picked game does not trap the visitor', async ({ page }) => {
 	await expect(page).toHaveURL(/\/poe2$/);
 	await page.goBack();
 	await expect(page).toHaveURL(/\/poe1$/);
+	await expect(page.locator('h1')).toHaveText('Path of Exile tools');
+	await expect(page.getByRole('group', { name: 'Game' }).first()).toContainText('PoE 1');
+	const cards = page.locator('main li.group');
+	await expect(cards.first()).toBeVisible();
+	const count = await cards.count();
+	for (let i = 0; i < count; i++) await expect(cards.nth(i)).toContainText('PoE 1');
 });
