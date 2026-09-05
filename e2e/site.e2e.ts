@@ -1,16 +1,52 @@
 import { expect, test } from '@playwright/test';
 
-test('home is a hero that links into the directory', async ({ page }) => {
-	await page.goto('/');
-	await expect(page.locator('h1')).toHaveText(/Third-party tools for Path.of.Exile/);
-	await page.getByRole('link', { name: 'Browse tools' }).click();
-	await expect(page).toHaveURL(/\/tools$/);
+test('a game page is a hero that links into its directory', async ({ page }) => {
+	await page.goto('/poe1');
+	await expect(page.locator('h1')).toHaveText('Tools for Path of Exile');
+	await page.getByRole('link', { name: /^Browse all \d+ tools$/ }).click();
+	await expect(page).toHaveURL(/\/tools\?game=poe1$/);
 });
 
-test('a home category links to a filtered directory', async ({ page }) => {
-	await page.goto('/');
+test('a game page category links to a filtered directory', async ({ page }) => {
+	await page.goto('/poe1');
 	await page.getByRole('link', { name: /^Trade/ }).click();
-	await expect(page).toHaveURL(/\/tools\?cat=trade$/);
+	await expect(page).toHaveURL(/\/tools\?game=poe1&cat=trade$/);
+});
+
+test('the chooser offers both games with live counts', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('h1')).toHaveText('Welcome to the Party, Exile');
+	await expect(page.getByRole('link', { name: /^Path of Exile tools, \d+ listed$/ })).toBeVisible();
+	await expect(
+		page.getByRole('link', { name: /^Path of Exile 2 tools, \d+ listed$/ })
+	).toBeVisible();
+});
+
+test('picking a game lands on its page and is remembered', async ({ page }) => {
+	await page.goto('/');
+	await page.getByRole('link', { name: /^Path of Exile 2 tools/ }).click();
+	await expect(page).toHaveURL(/\/poe2$/);
+	await expect(page.locator('h1')).toHaveText('Tools for Path of Exile 2');
+	await expect(page.evaluate(() => localStorage.getItem('exile.game'))).resolves.toBe('poe2');
+	await page.goto('/');
+	await expect(page).toHaveURL(/\/poe2$/);
+	await page.goto('/?choose');
+	await expect(page.locator('h1')).toHaveText('Welcome to the Party, Exile');
+});
+
+test('the chooser works without JavaScript', async ({ browser }) => {
+	const context = await browser.newContext({ javaScriptEnabled: false });
+	const page = await context.newPage();
+	await page.goto('/');
+	// position: both halves are full-viewport <a> elements distinguished only by clip-path, so
+	// their bounding-box centers coincide exactly on the seam and the click would otherwise land
+	// on whichever half paints on top there. A real pointer never lands on that literal hairline;
+	// this aims the click at the corner that is unambiguously the left half's.
+	await page
+		.getByRole('link', { name: /^Path of Exile tools/ })
+		.click({ position: { x: 20, y: 20 } });
+	await expect(page).toHaveURL(/\/poe1$/);
+	await context.close();
 });
 
 test('directory lists tool cards', async ({ page }) => {
@@ -33,7 +69,7 @@ test('unknown tool id is a 404', async ({ page }) => {
 });
 
 test('the submit dialog explains the pull request flow and closes on Escape', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/poe1');
 	await page.getByRole('button', { name: 'Submit a tool' }).first().click();
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
@@ -46,7 +82,7 @@ test('the submit dialog explains the pull request flow and closes on Escape', as
 test('the theme toggle still lands on the chosen theme through the view transition', async ({
 	page
 }) => {
-	await page.goto('/');
+	await page.goto('/poe1');
 	await page.getByRole('button', { name: 'Dark' }).click();
 	await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 	await page.getByRole('button', { name: 'Light' }).click();
@@ -56,7 +92,7 @@ test('the theme toggle still lands on the chosen theme through the view transiti
 });
 
 test('the footer reaches the maintainers page', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/poe1');
 	await page.getByRole('link', { name: 'Maintainers' }).click();
 	await expect(page).toHaveURL(/\/maintainers$/);
 	await expect(page.locator('h1')).toHaveText('Maintainers');

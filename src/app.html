@@ -21,6 +21,20 @@
 				if (choice !== 'system') el.dataset.theme = choice;
 			})();
 		</script>
+		<script>
+			// Runs before first paint: a remembered game skips the chooser. `?choose` shows it anyway.
+			// Keep in sync with GAME_KEY in src/lib/game.ts.
+			(() => {
+				if (location.pathname !== '/') return;
+				if (new URLSearchParams(location.search).has('choose')) return;
+				try {
+					const game = localStorage.getItem('exile.game');
+					if (game === 'poe1' || game === 'poe2') location.replace('/' + game);
+				} catch {
+					/* private mode */
+				}
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

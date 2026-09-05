@@ -1,0 +1,217 @@
+<script lang="ts">
+	import { resolve } from '$app/paths';
+	import poe1Jpg from '$lib/assets/chooser/poe1.jpg';
+	import poe1Webp from '$lib/assets/chooser/poe1.webp';
+	import poe2Jpg from '$lib/assets/chooser/poe2.jpg';
+	import poe2Webp from '$lib/assets/chooser/poe2.webp';
+	import { GAME_NAME } from '$lib/catalog/display';
+	import type { Game } from '$lib/catalog/schema';
+
+	interface Props {
+		game: Game;
+		count: number;
+		/** The half the pointer or keyboard focus is on, if any. */
+		hovered: Game | null;
+		/** The half that was picked and is growing to fill the viewport. */
+		expanding: Game | null;
+		onhover: (game: Game | null) => void;
+		onpick: (game: Game, href: string) => void;
+	}
+
+	let { game, count, hovered, expanding, onhover, onpick }: Props = $props();
+
+	const ART = {
+		poe1: { jpg: poe1Jpg, webp: poe1Webp, line: 'The original. A decade of tools.' },
+		poe2: { jpg: poe2Jpg, webp: poe2Webp, line: 'The sequel. Early access, new systems.' }
+	} as const;
+
+	const side = $derived(game === 'poe1' ? 'left' : 'right');
+	const href = $derived(resolve('/[game=game]', { game }));
+	const hot = $derived(hovered === game || expanding === game);
+	const dimmed = $derived(hovered !== null && hovered !== game);
+	const fading = $derived(expanding !== null && expanding !== game);
+</script>
+
+<!-- A real link: works without JS, is focusable, and hover preloads the game page. -->
+<a
+	{href}
+	class={[
+		'panel absolute inset-0 block outline-none',
+		side === 'left' ? 'panel-left' : 'panel-right'
+	]}
+	data-hot={hot ? '' : undefined}
+	data-dimmed={dimmed ? '' : undefined}
+	data-fading={fading ? '' : undefined}
+	data-expanding={expanding === game ? '' : undefined}
+	aria-label="{GAME_NAME[game]} tools, {count} listed"
+	onpointerenter={() => onhover(game)}
+	onpointerleave={() => onhover(null)}
+	onfocus={() => onhover(game)}
+	onblur={() => onhover(null)}
+	onclick={(event) => {
+		event.preventDefault();
+		onpick(game, href);
+	}}
+>
+	<picture class="art pointer-events-none absolute">
+		<source type="image/webp" srcset={ART[game].webp} />
+		<img
+			src={ART[game].jpg}
+			alt=""
+			class="size-full object-cover"
+			style:object-position={side === 'left' ? '40% 50%' : '60% 50%'}
+			loading="eager"
+			fetchpriority="high"
+			decoding="async"
+		/>
+	</picture>
+	<div class="shade pointer-events-none absolute inset-0" aria-hidden="true"></div>
+	<div
+		class="label absolute bottom-9 flex max-w-[440px] flex-col gap-1.5 md:bottom-16 md:gap-2 {side ===
+		'left'
+			? 'left-5 items-start text-left md:left-16'
+			: 'right-5 items-end text-right md:right-16'}"
+	>
+		<span
+			class="text-[24px] leading-[1.1] font-medium tracking-tight text-ink [text-shadow:0_1px_12px_rgb(0_0_0/0.45)] md:text-[30px]"
+		>
+			{GAME_NAME[game]}
+		</span>
+		<span class="text-[13.5px] leading-snug text-muted md:text-[14.5px]">{ART[game].line}</span>
+		<span
+			class="mt-1.5 flex items-center gap-3 text-[12.5px] text-muted md:mt-2 md:gap-3.5 md:text-[13px] {side ===
+			'left'
+				? ''
+				: 'flex-row-reverse'}"
+		>
+			<span
+				class="grid size-[30px] place-items-center rounded-full border border-line-strong bg-canvas/35 text-muted ring transition-colors duration-200 md:size-9"
+				aria-hidden="true"
+			>
+				<svg
+					viewBox="0 0 16 16"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.4"
+					class="size-3.5"
+				>
+					<path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</span>
+			<span class="hidden md:inline">Select</span>
+			<span class="hidden size-[3px] rounded-full bg-faint md:inline-block" aria-hidden="true"
+			></span>
+			<span class="text-faint tabular-nums">{count} tools</span>
+		</span>
+	</div>
+</a>
+
+<style>
+	@reference '../../routes/layout.css';
+
+	/* Mobile first: the halves stack, seam from 52% on the left edge to 48% on the right.
+	   Every polygon keeps four points in the same order so clip-path can animate between them. */
+	.panel {
+		transition:
+			clip-path 200ms cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.panel-left {
+		clip-path: polygon(0 0, 100% 0, 100% 48%, 0 52%);
+	}
+	.panel-right {
+		clip-path: polygon(0 52%, 100% 48%, 100% 100%, 0 100%);
+	}
+	.panel[data-expanding] {
+		clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+		transition-duration: 450ms;
+	}
+	.panel[data-fading] {
+		opacity: 0;
+	}
+
+	/* The image box covers only this half, so object-fit shows the intended crop. */
+	.art {
+		left: 0;
+		width: 100%;
+		transition:
+			left 450ms cubic-bezier(0.4, 0, 0.2, 1),
+			width 450ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.panel-left .art {
+		top: 0;
+		height: 52%;
+	}
+	.panel-right .art {
+		top: 48%;
+		height: 52%;
+	}
+
+	/* Dark in both themes: the values are the dark canvas token, not a theme variable. */
+	.shade {
+		background: linear-gradient(
+			to top,
+			rgb(20 22 25 / 0.94) 0%,
+			rgb(20 22 25 / 0.5) 34%,
+			rgb(20 22 25 / 0.14) 64%,
+			rgb(20 22 25 / 0.55) 100%
+		);
+	}
+
+	.label {
+		transition: opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.panel[data-expanding] .label {
+		opacity: 0;
+	}
+
+	img {
+		transition: filter 200ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	@media (hover: hover) {
+		.panel[data-hot] img {
+			filter: brightness(1.06);
+		}
+		.panel[data-dimmed] img {
+			filter: brightness(0.55) saturate(0.7);
+		}
+	}
+
+	/* Hover on pointer devices, focus everywhere, light the arrow the same way. */
+	.panel[data-hot] .ring,
+	.panel:focus-visible .ring {
+		background-color: var(--accent-fill);
+		border-color: var(--accent-fill);
+		color: var(--accent-on-fill);
+	}
+
+	@variant md {
+		.panel-left {
+			clip-path: polygon(0 0, var(--seam-top) 0, var(--seam-bottom) 100%, 0 100%);
+		}
+		.panel-right {
+			clip-path: polygon(var(--seam-top) 0, 100% 0, 100% 100%, var(--seam-bottom) 100%);
+		}
+		.panel[data-expanding] {
+			clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+		}
+		.panel-left .art,
+		.panel-right .art {
+			top: 0;
+			height: 100%;
+		}
+		.panel-left .art {
+			left: 0;
+			width: 62%;
+		}
+		.panel-right .art {
+			left: 38%;
+			width: 62%;
+		}
+		.panel[data-expanding] .art {
+			left: 0;
+			width: 100%;
+		}
+	}
+</style>
