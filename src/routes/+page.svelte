@@ -49,8 +49,13 @@
 
 		// Stage two: the layout cross-fades this view into the game page.
 		requestReveal();
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
-		await goto(href);
+		try {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
+			await goto(href);
+		} catch {
+			// A failed navigation hands the chooser back rather than leaving it mid-expand.
+			expanding = null;
+		}
 	}
 </script>
 

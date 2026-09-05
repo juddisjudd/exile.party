@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GAME_KEY, rememberGame, requestReveal, takeReveal } from './game';
+import { GAME_KEY, readGame, rememberGame, requestReveal, takeReveal } from './game';
 
 function fakeStore() {
 	const data = new Map<string, string>();
@@ -38,5 +38,31 @@ describe('reveal flag', () => {
 		requestReveal();
 		expect(takeReveal()).toBe(true);
 		expect(takeReveal()).toBe(false);
+	});
+});
+
+describe('readGame', () => {
+	it('returns a remembered game', () => {
+		const store = fakeStore();
+		store.setItem(GAME_KEY, 'poe1');
+		expect(readGame(store)).toBe('poe1');
+	});
+
+	it('ignores anything that is not a game id', () => {
+		const store = fakeStore();
+		store.setItem(GAME_KEY, 'poe3');
+		expect(readGame(store)).toBeNull();
+		expect(readGame(fakeStore())).toBeNull();
+		expect(readGame(null)).toBeNull();
+	});
+
+	it('survives a store that throws', () => {
+		const store = {
+			getItem: () => {
+				throw new Error('SecurityError');
+			},
+			setItem: () => {}
+		};
+		expect(readGame(store)).toBeNull();
 	});
 });

@@ -148,3 +148,15 @@ test('reduced motion skips straight to the game page', async ({ page }) => {
 	await expect(page).toHaveURL(/\/poe2$/);
 	await expect(page.locator('html')).not.toHaveAttribute('data-choose-transition', /.*/);
 });
+
+test('client-side navigation to / also honours the remembered game', async ({ page }) => {
+	await page.goto('/');
+	await page.getByRole('link', { name: /^Path of Exile 2 tools/ }).click();
+	await expect(page).toHaveURL(/\/poe2$/);
+	await page.goto('/poe1');
+	await page.getByRole('link', { name: 'exile.party home' }).click();
+	await expect(page).toHaveURL(/\/poe2$/);
+	await page.getByRole('link', { name: 'Switch game' }).first().click();
+	await expect(page).toHaveURL(/\/\?choose$/);
+	await expect(page.locator('h1')).toHaveText('Welcome to the Party, Exile');
+});

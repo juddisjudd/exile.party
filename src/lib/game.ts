@@ -1,4 +1,4 @@
-import type { Game } from './catalog/schema';
+import { Game } from './catalog/schema';
 
 /** Keep in sync with the inline redirect script in src/app.html. */
 export const GAME_KEY = 'exile.game';
@@ -9,12 +9,23 @@ export interface GameStore {
 	setItem(key: string, value: string): void;
 }
 
-/** Nothing in the app reads this back; the inline script in app.html is the only reader. */
+/** The layout reads this back through readGame on client-side navigation; the inline
+ *  script in app.html covers full loads. */
 export function rememberGame(game: Game, store: GameStore | null | undefined): void {
 	try {
 		store?.setItem(GAME_KEY, game);
 	} catch {
 		/* private mode: the chooser shows again next visit */
+	}
+}
+
+/** The remembered game, or null if there is none, it fails to parse, or the store throws. */
+export function readGame(store: GameStore | null | undefined): Game | null {
+	try {
+		const parsed = Game.safeParse(store?.getItem(GAME_KEY));
+		return parsed.success ? parsed.data : null;
+	} catch {
+		return null;
 	}
 }
 
