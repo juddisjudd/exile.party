@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { GAME_LABEL } from '$lib/catalog/display';
 	import type { Game } from '$lib/catalog/schema';
 	import ThemeToggle from './ThemeToggle.svelte';
 
@@ -8,9 +9,11 @@
 		game?: Game | null;
 		query?: string;
 		compact?: boolean;
+		/** On a per-game page: names the game and offers the way back to the chooser. */
+		context?: Game;
 	}
 
-	let { game = $bindable(null), query = $bindable(''), compact = false }: Props = $props();
+	let { game = $bindable(null), query = $bindable(''), compact = false, context }: Props = $props();
 
 	let search = $state<HTMLInputElement | null>(null);
 
@@ -63,6 +66,39 @@
 	</div>
 {/snippet}
 
+{#snippet contextPill(current: Game)}
+	<div
+		class="flex items-center gap-0.5 rounded-md border border-line bg-raised/60 p-0.5"
+		role="group"
+		aria-label="Game"
+	>
+		<span class="rounded-[4px] border border-line bg-surface px-2 py-[3px] text-[12.5px] text-ink">
+			{GAME_LABEL[current]}
+		</span>
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- path comes from resolve(); the rule cannot see through the query concatenation -->
+		<a
+			href="{resolve('/')}?choose"
+			class="flex items-center gap-1.5 rounded-[4px] border border-transparent px-2 py-[3px] text-[12.5px] text-faint transition-colors duration-100 hover:text-ink"
+		>
+			<svg
+				viewBox="0 0 16 16"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.3"
+				aria-hidden="true"
+				class="size-3.5"
+			>
+				<path
+					d="M3 5.5h9l-2.5-2.5M13 10.5H4l2.5 2.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+			Switch game
+		</a>
+	</div>
+{/snippet}
+
 {#snippet searchBox(extra: string)}
 	<div class="relative {extra}">
 		<svg
@@ -80,7 +116,7 @@
 			bind:this={search}
 			bind:value={query}
 			type="search"
-			placeholder="Search tools"
+			placeholder={context ? `Search ${GAME_LABEL[context]} tools` : 'Search tools'}
 			aria-label="Search tools"
 			class="h-8 w-full rounded-md border border-line bg-surface pr-9 pl-8 text-[13px] text-ink transition-colors duration-100 outline-none placeholder:text-faint focus:border-accent-line"
 		/>
@@ -102,7 +138,9 @@
 				exile<span class="text-faint">.</span>party
 			</a>
 
-			{#if !compact}
+			{#if context}
+				<div class="hidden md:block">{@render contextPill(context)}</div>
+			{:else if !compact}
 				<div class="hidden md:block">{@render gameToggle()}</div>
 			{/if}
 
@@ -117,7 +155,11 @@
 		{#if !compact}
 			<div class="flex items-center gap-3 pb-3 md:hidden">
 				{@render searchBox('flex-1')}
-				{@render gameToggle()}
+				{#if context}
+					{@render contextPill(context)}
+				{:else}
+					{@render gameToggle()}
+				{/if}
 			</div>
 		{/if}
 	</div>

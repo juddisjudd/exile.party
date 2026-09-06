@@ -3,7 +3,14 @@ import { resolve } from 'node:path';
 import { Renderer } from '@takumi-rs/core';
 import { render } from 'takumi-js';
 import { loadCatalog } from '../src/lib/server/catalog';
-import { GAME_LABEL, PLATFORM_LABEL, PRICING_LABEL, monogram } from '../src/lib/catalog/display';
+import {
+	GAME_LABEL,
+	GAME_NAME,
+	PLATFORM_LABEL,
+	PRICING_LABEL,
+	monogram
+} from '../src/lib/catalog/display';
+import { countByGame } from '../src/lib/catalog/home';
 import { SITE_NAME } from '../src/lib/site';
 
 const OUT = resolve(process.cwd(), 'static/og');
@@ -85,6 +92,7 @@ function pageCard(title: string, subtitle: string, eyebrow: string): string {
 
 async function main() {
 	const catalog = loadCatalog();
+	const counts = countByGame(catalog.tools);
 	const renderer = new Renderer();
 
 	// One variable file, declared at both weights the cards use.
@@ -119,7 +127,15 @@ async function main() {
 				'The people who keep this directory running. Anyone can add a listing by pull request.',
 				''
 			)
-		}
+		},
+		...(['poe1', 'poe2'] as const).map((game) => ({
+			file: `${game}.png`,
+			html: pageCard(
+				`${GAME_NAME[game]} tools`,
+				`${counts[game]} community tools for ${GAME_NAME[game]}, filterable by category, platform, price, and licence.`,
+				GAME_NAME[game]
+			)
+		}))
 	];
 
 	for (const tool of catalog.tools) {

@@ -61,6 +61,7 @@ export function repoLinks(tool: Tool): GameLink[] {
 }
 
 export const GAME_LABEL = { poe1: 'PoE 1', poe2: 'PoE 2' } as const;
+export const GAME_NAME = { poe1: 'Path of Exile', poe2: 'Path of Exile 2' } as const;
 export const PLATFORM_LABEL = {
 	windows: 'Windows',
 	macos: 'macOS',

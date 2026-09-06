@@ -52,7 +52,9 @@
 	}
 }
 
-:root[data-theme='dark'] {
+/* The chooser is art-led and always dark, whatever the theme: it forces this block on its own subtree. */
+:root[data-theme='dark'],
+[data-force-theme='dark'] {
 	color-scheme: dark;
 
 	--canvas: #141619;
