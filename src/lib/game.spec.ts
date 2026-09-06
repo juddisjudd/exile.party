@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { GAME_KEY, gameStore, readGame, rememberGame, requestReveal, takeReveal } from './game';
+import { GAME_KEY, gameStore, readGame, rememberGame } from './game';
 
 function fakeStore() {
 	const data = new Map<string, string>();
@@ -58,15 +58,6 @@ describe('gameStore', () => {
 			}
 		});
 		expect(gameStore()).toBeNull();
-	});
-});
-
-describe('reveal flag', () => {
-	it('is handed out once per request', () => {
-		expect(takeReveal()).toBe(false);
-		requestReveal();
-		expect(takeReveal()).toBe(true);
-		expect(takeReveal()).toBe(false);
 	});
 });
 

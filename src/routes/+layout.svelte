@@ -1,10 +1,10 @@
 <script lang="ts">
 	import './layout.css';
-	import { beforeNavigate, goto, onNavigate } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import favicon from '$lib/assets/favicon.svg';
 	import SubmitDialog from '$lib/components/SubmitDialog.svelte';
-	import { gameStore, readGame, takeReveal } from '$lib/game';
+	import { gameStore, readGame } from '$lib/game';
 
 	let { children, data } = $props();
 
@@ -19,24 +19,6 @@
 		if (game === null) return;
 		navigation.cancel();
 		goto(resolve('/[game=game]', { game }), { replaceState: true });
-	});
-
-	/* Only the chooser asks for this; every other navigation is left alone. The attribute scopes
-	   the pseudo-element rules in layout.css to this transition, as the theme reveal does. */
-	onNavigate((navigation) => {
-		if (!takeReveal() || typeof document.startViewTransition !== 'function') return;
-		const el = document.documentElement;
-		el.dataset.chooseTransition = '';
-		return new Promise((done) => {
-			const transition = document.startViewTransition(async () => {
-				done();
-				// transition.finished still runs and removes the attribute even if navigation fails.
-				await navigation.complete.catch(() => {});
-			});
-			transition.finished.finally(() => {
-				delete el.dataset.chooseTransition;
-			});
-		});
 	});
 </script>
 

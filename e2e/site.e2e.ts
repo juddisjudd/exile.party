@@ -34,7 +34,8 @@ test('picking a game lands on its page and is remembered', async ({ page }) => {
 	await page.goto('/');
 	await page.getByRole('link', { name: /^Path of Exile 2 tools/ }).click();
 	await expect(page).toHaveURL(/\/poe2$/);
-	await expect(page.locator('h1')).toHaveText('Path of Exile 2 tools');
+	// Scoped to main: the chooser's own h1 can still be mid-outro, pinned over this page.
+	await expect(page.locator('main h1')).toHaveText('Path of Exile 2 tools');
 	await expect(page.evaluate(() => localStorage.getItem('exile.game'))).resolves.toBe('poe2');
 	await page.goto('/');
 	await expect(page).toHaveURL(/\/poe2$/);
@@ -132,17 +133,16 @@ test('the switch-game link reaches the chooser with the escape-hatch querystring
 	await expect(page).toHaveURL(/\/\?choose$/);
 });
 
-test('the pick dissolves into the game page and cleans up the transition attribute', async ({
-	page
-}) => {
+test('the picked half opens over the game page, then the chooser is removed', async ({ page }) => {
 	await page.goto('/');
 	await page
 		.getByRole('link', { name: /^Path of Exile tools/ })
 		.click({ position: { x: 20, y: 20 } });
 	await expect(page).toHaveURL(/\/poe1$/);
-	await expect(page.locator('h1')).toHaveText('Path of Exile tools');
-	// The scoping attribute must be cleaned up, or the rules leak into later transitions.
-	await expect(page.locator('html')).not.toHaveAttribute('data-choose-transition', /.*/);
+	await expect(page.locator('.chooser')).toHaveAttribute('data-picked', 'poe1');
+	// Scoped to main: the chooser's own h1 is still mid-outro, pinned over this page.
+	await expect(page.locator('main h1')).toHaveText('Path of Exile tools');
+	await expect(page.locator('.chooser')).toHaveCount(0);
 });
 
 test('reduced motion skips straight to the game page', async ({ page }) => {
@@ -150,7 +150,7 @@ test('reduced motion skips straight to the game page', async ({ page }) => {
 	await page.goto('/');
 	await page.getByRole('link', { name: /^Path of Exile 2 tools/ }).click();
 	await expect(page).toHaveURL(/\/poe2$/);
-	await expect(page.locator('html')).not.toHaveAttribute('data-choose-transition', /.*/);
+	await expect(page.locator('.chooser')).toHaveCount(0);
 });
 
 test('client-side navigation to / also honours the remembered game', async ({ page }) => {
@@ -199,7 +199,8 @@ test('back from a picked game does not trap the visitor', async ({ page }) => {
 	await expect(page).toHaveURL(/\/poe2$/);
 	await page.goBack();
 	await expect(page).toHaveURL(/\/poe1$/);
-	await expect(page.locator('h1')).toHaveText('Path of Exile tools');
+	// Scoped to main: the chooser's own h1 can still be mid-outro from the earlier pick.
+	await expect(page.locator('main h1')).toHaveText('Path of Exile tools');
 	await expect(page.getByRole('group', { name: 'Game' }).first()).toContainText('PoE 1');
 	const cards = page.locator('main li.group');
 	await expect(cards.first()).toBeVisible();

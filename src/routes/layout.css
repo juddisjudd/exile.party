@@ -78,27 +78,6 @@
 		z-index: 9999;
 	}
 
-	/* Chooser to game page only. The new page is painted solid underneath from the first frame;
-	   the chooser snapshot dissolves over it, so the page reads as if it had been there all along. */
-	html[data-choose-transition]::view-transition-new(root) {
-		animation: none;
-		mix-blend-mode: normal;
-		z-index: 1;
-	}
-
-	html[data-choose-transition]::view-transition-old(root) {
-		animation: choose-dissolve 900ms cubic-bezier(0.4, 0, 0.2, 1) both;
-		mix-blend-mode: normal;
-		z-index: 2;
-	}
-
-	@keyframes choose-dissolve {
-		to {
-			opacity: 0;
-			transform: scale(1.03);
-		}
-	}
-
 	/* Hover is a border or background shift, never motion. Honour the OS setting anyway. */
 	@media (prefers-reduced-motion: reduce) {
 		*,

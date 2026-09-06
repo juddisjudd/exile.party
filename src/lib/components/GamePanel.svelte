@@ -12,11 +12,13 @@
 		count: number;
 		/** The half the pointer or keyboard focus is on, if any. */
 		hovered: Game | null;
+		/** The half that has been picked and is opening into the exit, if any. */
+		picked: Game | null;
 		onhover: (game: Game | null) => void;
 		onpick: (game: Game, href: string) => void;
 	}
 
-	let { game, count, hovered, onhover, onpick }: Props = $props();
+	let { game, count, hovered, picked, onhover, onpick }: Props = $props();
 
 	const ART = {
 		poe1: { jpg: poe1Jpg, webp: poe1Webp, line: 'The original. A decade of tools.' },
@@ -27,6 +29,8 @@
 	const href = $derived(resolve('/[game=game]', { game }));
 	const hot = $derived(hovered === game);
 	const dimmed = $derived(hovered !== null && hovered !== game);
+	const isPicked = $derived(picked === game);
+	const isOther = $derived(picked !== null && picked !== game);
 </script>
 
 <!-- A real link: works without JS, is focusable, and hover preloads the game page. -->
@@ -38,6 +42,8 @@
 	]}
 	data-hot={hot ? '' : undefined}
 	data-dimmed={dimmed ? '' : undefined}
+	data-picked={isPicked ? '' : undefined}
+	data-other={isOther ? '' : undefined}
 	aria-label="{GAME_NAME[game]} tools, {count} listed"
 	onpointerenter={() => onhover(game)}
 	onpointerleave={() => onhover(null)}
@@ -133,6 +139,39 @@
 		height: 52%;
 	}
 
+	/* A picked half opens to the full box as --exit runs 0 to 1; the maths keeps four points in order. */
+	.panel[data-picked] {
+		transition: none;
+	}
+	.panel-left[data-picked] {
+		clip-path: polygon(
+			0 0,
+			100% 0,
+			100% calc(48% + 52% * var(--exit, 0)),
+			0 calc(52% + 48% * var(--exit, 0))
+		);
+	}
+	.panel-right[data-picked] {
+		clip-path: polygon(
+			0 calc(52% * (1 - var(--exit, 0))),
+			100% calc(48% * (1 - var(--exit, 0))),
+			100% 100%,
+			0 100%
+		);
+	}
+	.panel-left[data-picked] :is(.art, .shade) {
+		top: 0;
+		height: calc(52% + 48% * var(--exit, 0));
+	}
+	.panel-right[data-picked] :is(.art, .shade) {
+		top: calc(48% * (1 - var(--exit, 0)));
+		height: calc(52% + 48% * var(--exit, 0));
+	}
+	.panel[data-other],
+	.panel[data-picked] .label {
+		opacity: calc(1 - min(1, var(--exit, 0) * 2));
+	}
+
 	/* Dark in both themes: the values are the dark canvas token, not a theme variable. */
 	.shade {
 		background: linear-gradient(
@@ -220,6 +259,34 @@
 		.panel-right .art {
 			left: 38%;
 			width: 62%;
+		}
+		.panel-left[data-picked] {
+			clip-path: polygon(
+				0 0,
+				calc(var(--seam-top) + (100% - var(--seam-top)) * var(--exit, 0)) 0,
+				calc(var(--seam-bottom) + (100% - var(--seam-bottom)) * var(--exit, 0)) 100%,
+				0 100%
+			);
+		}
+		.panel-right[data-picked] {
+			clip-path: polygon(
+				calc(var(--seam-top) * (1 - var(--exit, 0))) 0,
+				100% 0,
+				100% 100%,
+				calc(var(--seam-bottom) * (1 - var(--exit, 0))) 100%
+			);
+		}
+		.panel-left[data-picked] :is(.art, .shade) {
+			top: 0;
+			left: 0;
+			width: calc(62% + 38% * var(--exit, 0));
+			height: 100%;
+		}
+		.panel-right[data-picked] :is(.art, .shade) {
+			top: 0;
+			left: calc(38% * (1 - var(--exit, 0)));
+			width: calc(62% + 38% * var(--exit, 0));
+			height: 100%;
 		}
 	}
 </style>

@@ -102,25 +102,32 @@ the alternate pair; the code takes whichever pair is approved and nothing else c
 
 ## The transition
 
+No View Transition: a View Transition snapshot is a still image, and the point of this
+motion is to see the picked half keep opening while it fades, which nothing inside a
+snapshot can do. Instead the chooser's own DOM stays alive through a Svelte outro, pinned
+over the new page, with a single progress variable driving everything.
+
 On click, with JS:
 
-1. `rememberGame(game)`.
-2. If `prefers-reduced-motion: reduce` or `document.startViewTransition` is missing:
-   `goto(href, { replaceState: true })` and stop — no transition at all.
-3. Otherwise call `requestReveal()` in `game.ts`, then `goto(href, { replaceState: true })`.
-   There is no expand stage on the chooser itself; the click hands straight off to the
-   navigation.
-4. `+layout.svelte` registers `onNavigate`. When `takeReveal()` returns true it
-   sets `data-choose-transition` on `<html>`, and wraps the navigation in
-   `document.startViewTransition` using the SvelteKit-documented pattern (resolve inside
-   the callback, then `await navigation.complete`). `transition.finished` removes the
-   attribute. Every other navigation is untouched.
-5. `layout.css`: under `html[data-choose-transition]`, `::view-transition-new(root)` gets no
-   animation and sits underneath (`z-index: 1`) so the game page is rendered solid from the
-   first frame, as if it had been there all along. `::view-transition-old(root)` sits above
-   it (`z-index: 2`) and dissolves away over 900ms, `cubic-bezier(0.4, 0, 0.2, 1)`: opacity
-   to 0 and a slight zoom, `scale(1.03)`. Both keep `mix-blend-mode: normal`, the same
-   scoping trick the theme reveal uses with `data-theme-transition`.
+1. `pick(game, href)` sets `picked = game`, calls `rememberGame(game)`, then
+   `goto(href, { replaceState: true })`. A failed navigation resets `picked` to `null` so
+   the chooser is handed back rather than left half-picked. There is no expand stage before
+   the navigation; the click hands straight off.
+2. SvelteKit destroys the chooser's page component as part of the swap. Its root carries
+   `out:exit|global`, so Svelte keeps the element in the DOM until the outro finishes, even
+   though the component itself is already gone. The outro flips the root to
+   `position: fixed; inset: 0`, pinning it over the new page, which is live underneath from
+   the moment navigation completes.
+3. With nothing picked (brand link, "Browse all tools") or `prefers-reduced-motion: reduce`,
+   the outro returns `{ duration: 0 }` and the chooser is gone instantly.
+4. Otherwise the outro runs 900ms (`EXIT_MS`), `cubicOut`, using `tick` (not `css`) so it can
+   write a `--exit` custom property on the root every frame, climbing 0 to 1.
+5. The stylesheet turns `--exit` into motion: the picked panel's clip-path and its art/shade
+   box open from the seam to the full viewport; the other half, the headline block, seam,
+   labels and credit fade out over the first half of the run (`--exit * 2`, clamped); the
+   whole pinned layer fades out over the last 70% (`(--exit - 0.3) / 0.7`, clamped). Every
+   clip-path polygon keeps four points in the same order between its resting and open state
+   so it can animate at all.
 
 Total about 900ms — one motion, not two. Back navigation from the game page to `/` shows
 the chooser only via `?choose`; a plain `/` redirects again, which is the intended memory

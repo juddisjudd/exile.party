@@ -37,17 +37,3 @@ export function readGame(store: GameStore | null | undefined): Game | null {
 		return null;
 	}
 }
-
-/* Set by the chooser right before it navigates, read once by the layout's onNavigate,
-   so only that one navigation gets the cross-fade. */
-let reveal = false;
-
-export function requestReveal(): void {
-	reveal = true;
-}
-
-export function takeReveal(): boolean {
-	const pending = reveal;
-	reveal = false;
-	return pending;
-}

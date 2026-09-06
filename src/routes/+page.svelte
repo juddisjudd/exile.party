@@ -5,7 +5,9 @@
 	import type { Game } from '$lib/catalog/schema';
 	import GamePanel from '$lib/components/GamePanel.svelte';
 	import Meta from '$lib/components/Meta.svelte';
-	import { gameStore, rememberGame, requestReveal, takeReveal } from '$lib/game';
+	import { gameStore, rememberGame } from '$lib/game';
+	import { cubicOut } from 'svelte/easing';
+	import type { TransitionConfig } from 'svelte/transition';
 
 	let { data } = $props();
 
@@ -15,8 +17,11 @@
 	const SEAM_BOTTOM = 46;
 	const SHIFT = 8;
 
+	// The length of the outro below.
+	const EXIT_MS = 900;
+
 	let hovered = $state<Game | null>(null);
-	let picking = $state(false);
+	let picked = $state<Game | null>(null);
 
 	const shift = $derived(hovered === 'poe2' ? -SHIFT : hovered === 'poe1' ? SHIFT : 0);
 	const seamTop = $derived(SEAM_TOP + shift);
@@ -26,25 +31,32 @@
 	const canHover = browser && matchMedia('(hover: hover)').matches;
 
 	function hover(game: Game | null) {
-		if (canHover && !picking) hovered = game;
+		if (canHover && picked === null) hovered = game;
 	}
 
 	async function pick(game: Game, href: string) {
-		if (picking) return;
-		picking = true;
+		if (picked !== null) return;
+		picked = game;
 		rememberGame(game, gameStore());
-
-		const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (!still && typeof document.startViewTransition === 'function') requestReveal();
-
 		try {
 			// eslint-disable-next-line svelte/no-navigation-without-resolve -- href comes from GamePanel's resolve() call; the rule cannot see through the onpick prop boundary
 			await goto(href, { replaceState: true });
 		} catch {
 			// A failed navigation hands the chooser back rather than leaving it half picked.
-			takeReveal();
-			picking = false;
+			picked = null;
 		}
+	}
+
+	/* Plays as SvelteKit removes the page: the root is pinned over the new page and --exit runs
+	   0 to 1, which the stylesheet turns into the picked half opening and everything else fading. */
+	function exit(node: HTMLElement): TransitionConfig {
+		const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (picked === null || still) return { duration: 0 };
+		return {
+			duration: EXIT_MS,
+			easing: cubicOut,
+			tick: (_t, u) => node.style.setProperty('--exit', String(u))
+		};
 	}
 </script>
 
@@ -60,8 +72,10 @@
 <div
 	class="chooser relative flex min-h-dvh flex-col overflow-hidden bg-canvas text-ink"
 	data-force-theme="dark"
+	data-picked={picked ?? undefined}
 	style:--seam-top="{seamTop}%"
 	style:--seam-bottom="{seamBottom}%"
+	out:exit|global
 >
 	<!-- On desktop the band floats over the art; only its link takes pointer events. -->
 	<div class="band pointer-events-none relative z-10 md:absolute md:inset-x-0 md:top-0">
@@ -108,8 +122,22 @@
 	</div>
 
 	<div class="relative min-h-[560px] flex-1 md:absolute md:inset-0 md:min-h-0">
-		<GamePanel game="poe1" count={data.counts.poe1} {hovered} onhover={hover} onpick={pick} />
-		<GamePanel game="poe2" count={data.counts.poe2} {hovered} onhover={hover} onpick={pick} />
+		<GamePanel
+			game="poe1"
+			count={data.counts.poe1}
+			{hovered}
+			{picked}
+			onhover={hover}
+			onpick={pick}
+		/>
+		<GamePanel
+			game="poe2"
+			count={data.counts.poe2}
+			{hovered}
+			{picked}
+			onhover={hover}
+			onpick={pick}
+		/>
 
 		<div class="seam pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
@@ -128,6 +156,19 @@
 
 <style>
 	@reference './layout.css';
+
+	/* The root floats over the new page from the moment a half is picked; --exit is still 0
+	   until the outro runs, so nothing changes visually until then. */
+	.chooser[data-picked] {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		pointer-events: none;
+		opacity: clamp(0, 1 - (var(--exit, 0) - 0.3) / 0.7, 1);
+	}
+	.chooser[data-picked] :is(.band, .seam, .credit, .glow) {
+		opacity: calc(1 - min(1, var(--exit, 0) * 2));
+	}
 
 	/* One-pixel hairline clipped out of a full-size box, so it slides with the panels. */
 	.seam {
