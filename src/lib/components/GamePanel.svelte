@@ -63,7 +63,7 @@
 			src={ART[game].jpg}
 			alt=""
 			class="size-full object-cover"
-			style:object-position={side === 'left' ? '40% 50%' : '45% 50%'}
+			style:object-position={side === 'left' ? '0% 50%' : '45% 50%'}
 			loading="eager"
 			fetchpriority="high"
 			decoding="async"

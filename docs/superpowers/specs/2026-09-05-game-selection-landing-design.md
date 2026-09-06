@@ -95,10 +95,12 @@ Always dark: `tokens.css` gains `[data-force-theme='dark']` alongside
 dark token values for its subtree and every `text-ink`, `bg-canvas` utility inside picks
 them up. The chooser's root carries that attribute and `min-h-dvh`.
 
-Art: `src/lib/assets/chooser/poe1.{jpg,webp}` (Warden of Eaves) and `poe2.{jpg,webp}`
-(Viper Napuatzi), cropped to exclude the GGG logo, about 1800px on the long side,
-served through `<picture>`. Direction B on the canvas (Primal Huntress and Diamora) is
-the alternate pair; the code takes whichever pair is approved and nothing else changes.
+Art: `src/lib/assets/chooser/poe1.{jpg,webp}` is Valerie with the Allflame lantern, the
+Curse of the Allflame (3.29) key art from GGG's press kit (`KeyArt.png`, 5689x3200),
+cropped to the centre 3600px so she sits left of the seam. `poe2.{jpg,webp}` is Viper
+Napuatzi from the PoE 2 boss wallpapers, cropped to exclude the GGG logo. Both are about
+1800px on the long side and served through `<picture>`. The PoE 1 half is meant to follow
+the current league: swap the asset when a new key art lands.
 
 ## The transition
 
