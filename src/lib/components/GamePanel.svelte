@@ -228,9 +228,9 @@
 	/* Hover on pointer devices, focus everywhere: the arrow lights up and the label grows. */
 	.panel[data-hot] .ring,
 	.panel:focus-visible .ring {
-		background-color: var(--accent-fill);
-		border-color: var(--accent-fill);
-		color: var(--accent-on-fill);
+		background-color: var(--ink);
+		border-color: var(--ink);
+		color: var(--canvas);
 	}
 	.panel[data-hot] .label,
 	.panel:focus-visible .label {

@@ -83,7 +83,8 @@ Layout, desktop (from the canvas, Direction A):
   with GGG."
 - Hover (pointer devices only, `@media (hover: hover)`): the seam shifts 8% away from the
   hovered half (58/42), the hovered image brightens slightly, the other dims to 55%
-  brightness and 70% saturation, the hovered circle fills with `--accent-fill`. All
+  brightness and 70% saturation, the hovered circle fills with `--ink` and its arrow turns
+  `--canvas` (white on black in the forced-dark chooser). All
   transitions 200ms. The headline does not move.
 
 Layout, below `md`: a canvas-coloured band at the top holds the brand and the headline
