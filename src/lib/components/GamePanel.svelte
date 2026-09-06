@@ -21,8 +21,8 @@
 	let { game, count, hovered, picked, onhover, onpick }: Props = $props();
 
 	const ART = {
-		poe1: { jpg: poe1Jpg, webp: poe1Webp, line: 'The original. A decade of tools.' },
-		poe2: { jpg: poe2Jpg, webp: poe2Webp, line: 'The sequel. Early access, new systems.' }
+		poe1: { jpg: poe1Jpg, webp: poe1Webp },
+		poe2: { jpg: poe2Jpg, webp: poe2Webp }
 	} as const;
 
 	const side = $derived(game === 'poe1' ? 'left' : 'right');
@@ -81,7 +81,6 @@
 		>
 			{GAME_NAME[game]}
 		</span>
-		<span class="text-[13.5px] leading-snug text-muted md:text-[14.5px]">{ART[game].line}</span>
 		<span
 			class="mt-1.5 flex items-center gap-3 text-[12.5px] text-muted md:mt-2 md:gap-3.5 md:text-[13px] {side ===
 			'left'
@@ -193,8 +192,15 @@
 		height: 52%;
 	}
 
+	/* The label grows from its outer corner on hover, so the chosen half reads as chosen. */
 	.label {
-		transition: opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
+		transform-origin: bottom left;
+		transition:
+			opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
+			transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.panel-right .label {
+		transform-origin: bottom right;
 	}
 	/* The left half's label sits at the bottom of the full-height anchor by default, which is
 	   outside .panel-left's clip polygon on the stacked mobile layout. Pull it up to just above
@@ -214,14 +220,21 @@
 		.panel[data-dimmed] img {
 			filter: brightness(0.55) saturate(0.7);
 		}
+		.panel[data-dimmed] .label {
+			opacity: 0.4;
+		}
 	}
 
-	/* Hover on pointer devices, focus everywhere, light the arrow the same way. */
+	/* Hover on pointer devices, focus everywhere: the arrow lights up and the label grows. */
 	.panel[data-hot] .ring,
 	.panel:focus-visible .ring {
 		background-color: var(--accent-fill);
 		border-color: var(--accent-fill);
 		color: var(--accent-on-fill);
+	}
+	.panel[data-hot] .label,
+	.panel:focus-visible .label {
+		transform: scale(1.12);
 	}
 
 	/* The panel itself carries outline-none so the arrow fill can be the hover signal too, but

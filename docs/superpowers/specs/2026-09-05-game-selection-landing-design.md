@@ -23,7 +23,7 @@ Decisions already taken (in conversation, 2026-09-05):
 | Theme on the chooser  | Always dark; destination honours the user's theme                         |
 | Hover                 | Modest: seam shifts 8%, other half dims                                   |
 | Memory                | Remember the pick and auto-redirect `/` to it                             |
-| Side copy             | Game label, one-liner, live tool count                                    |
+| Side copy             | Game label and live tool count (one-liners dropped after review)          |
 | Nudge for new players | Omitted                                                                   |
 
 ## Routes
@@ -76,9 +76,9 @@ Layout, desktop (from the canvas, Direction A):
 - Headline block, centred over the seam: "Welcome to the Party, Exile" (58px, 500),
   "Explore tools for Path of Exile" (17px, muted), "Choose your game" (11px uppercase
   eyebrow with hairlines).
-- Labels, bottom of each half: "Path of Exile" / "Path of Exile 2" (30px, 500), one-liner
-  ("The original. A decade of tools." / "The sequel. Early access, new systems."), then
-  a 36px circle with an arrow, "Select", and the live count.
+- Labels, bottom of each half: "Path of Exile" / "Path of Exile 2" (30px, 500), then a
+  36px circle with an arrow, "Select", and the live count. On hover the hovered label
+  grows 12% from its outer corner and the other label fades to 40%.
 - Credit, bottom centre, 11px faint: "Artwork by Grinding Gear Games. Not affiliated
   with GGG."
 - Hover (pointer devices only, `@media (hover: hover)`): the seam shifts 8% away from the
