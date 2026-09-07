@@ -17,6 +17,7 @@ const tool = (over: Partial<Tool> & { id: string }): Tool => ({
 	byMaintainer: false,
 	status: 'active',
 	lastVerified: '2026-01-01',
+	screenshots: [],
 	...over
 });
 
