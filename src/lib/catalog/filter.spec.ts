@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
 	EMPTY_FILTERS,
-	activeChipCount,
+	activeFilterCount,
 	filterTools,
 	fromSearchParams,
 	isStale,
-	toSearchParams
+	searchTools,
+	toSearchParams,
+	toggle
 } from './filter';
+import type { Filters } from './filter';
 import type { Tool } from './schema';
 
 const tool = (over: Partial<Tool>): Tool => ({
@@ -25,6 +28,7 @@ const tool = (over: Partial<Tool>): Tool => ({
 	byMaintainer: false,
 	status: 'active',
 	lastVerified: '2026-01-01',
+	screenshots: [],
 	...over
 });
 
@@ -35,6 +39,7 @@ const tools = [
 		games: ['poe1'],
 		category: 'trade',
 		tags: ['overlay'],
+		platforms: ['windows', 'linux'],
 		openSource: true
 	}),
 	tool({
@@ -42,6 +47,7 @@ const tools = [
 		name: 'Builder',
 		games: ['poe1', 'poe2'],
 		category: 'build-planning',
+		platforms: ['windows'],
 		pricing: 'paid',
 		openSource: true
 	}),
@@ -51,11 +57,12 @@ const tools = [
 		description: 'Crafting sim.',
 		games: ['poe2'],
 		category: 'crafting',
+		platforms: ['web'],
 		official: true
 	})
 ];
 
-const categories = ['trade', 'build-planning', 'crafting'];
+const ids = (list: Tool[]) => list.map((t) => t.id);
 
 describe('isStale', () => {
 	it('is stale after the threshold', () => {
@@ -71,88 +78,107 @@ describe('filterTools', () => {
 		expect(filterTools(tools, EMPTY_FILTERS)).toHaveLength(3);
 	});
 	it('filters by game', () => {
-		expect(filterTools(tools, { ...EMPTY_FILTERS, game: 'poe2' }).map((t) => t.id)).toEqual([
-			'b',
+		expect(ids(filterTools(tools, { ...EMPTY_FILTERS, game: 'poe2' }))).toEqual(['b', 'c']);
+	});
+	it('matches any of the chosen platforms', () => {
+		expect(ids(filterTools(tools, { ...EMPTY_FILTERS, platforms: ['linux'] }))).toEqual(['a']);
+		expect(ids(filterTools(tools, { ...EMPTY_FILTERS, platforms: ['linux', 'web'] }))).toEqual([
+			'a',
 			'c'
 		]);
 	});
-	it('filters by category', () => {
-		expect(filterTools(tools, { ...EMPTY_FILTERS, category: 'trade' }).map((t) => t.id)).toEqual([
-			'a'
-		]);
-	});
-	it('filters by pricing', () => {
-		expect(filterTools(tools, { ...EMPTY_FILTERS, pricing: 'paid' }).map((t) => t.id)).toEqual([
-			'b'
-		]);
+	it('matches any of the chosen prices', () => {
+		expect(ids(filterTools(tools, { ...EMPTY_FILTERS, pricing: ['paid'] }))).toEqual(['b']);
+		expect(ids(filterTools(tools, { ...EMPTY_FILTERS, pricing: ['free', 'paid'] }))).toHaveLength(
+			3
+		);
 	});
 	it('filters open from closed source', () => {
-		expect(filterTools(tools, { ...EMPTY_FILTERS, code: 'open' }).map((t) => t.id)).toEqual([
-			'a',
-			'b'
-		]);
-		expect(filterTools(tools, { ...EMPTY_FILTERS, code: 'closed' }).map((t) => t.id)).toEqual([
-			'c'
-		]);
+		expect(ids(filterTools(tools, { ...EMPTY_FILTERS, code: ['open'] }))).toEqual(['a', 'b']);
+		expect(ids(filterTools(tools, { ...EMPTY_FILTERS, code: ['closed'] }))).toEqual(['c']);
 	});
-	it('filters official from community', () => {
-		expect(filterTools(tools, { ...EMPTY_FILTERS, origin: 'official' }).map((t) => t.id)).toEqual([
-			'c'
-		]);
-	});
-	it('matches query against name and description, case-insensitive', () => {
-		expect(filterTools(tools, { ...EMPTY_FILTERS, query: 'CRAFT' }).map((t) => t.id)).toEqual([
-			'c'
-		]);
-	});
-	it('matches query against tags', () => {
-		expect(filterTools(tools, { ...EMPTY_FILTERS, query: 'overlay' }).map((t) => t.id)).toEqual([
-			'a'
-		]);
-	});
-	it('combines dimensions', () => {
+	it('requires every set to match', () => {
 		expect(
-			filterTools(tools, { ...EMPTY_FILTERS, game: 'poe1', pricing: 'paid' }).map((t) => t.id)
+			ids(
+				filterTools(tools, {
+					...EMPTY_FILTERS,
+					game: 'poe1',
+					platforms: ['windows'],
+					pricing: ['paid']
+				})
+			)
 		).toEqual(['b']);
 	});
 });
 
-describe('activeChipCount', () => {
-	it('ignores game, which lives in the top bar', () => {
-		expect(activeChipCount({ ...EMPTY_FILTERS, game: 'poe2' })).toBe(0);
+describe('searchTools', () => {
+	it('returns nothing for a blank query', () => {
+		expect(searchTools(tools, '   ')).toEqual([]);
 	});
-	it('counts each set chip once and ignores a blank query', () => {
+	it('matches name, tags and description, case-insensitive', () => {
+		expect(ids(searchTools(tools, 'CRAFT'))).toEqual(['c']);
+		expect(ids(searchTools(tools, 'overlay'))).toEqual(['a']);
+		expect(ids(searchTools(tools, 'things'))).toEqual(['a', 'b']);
+	});
+	it('ranks a name that starts with the query above one that contains it, above a tag, above a description', () => {
+		const list = [
+			tool({ id: 'desc', name: 'Zed', description: 'Handles trade.' }),
+			tool({ id: 'tag', name: 'Yak', tags: ['trade-helper'] }),
+			tool({ id: 'contains', name: 'Bulk Trade' }),
+			tool({ id: 'starts', name: 'Trade Macro' })
+		];
+		expect(ids(searchTools(list, 'trade'))).toEqual(['starts', 'contains', 'tag', 'desc']);
+	});
+});
+
+describe('activeFilterCount', () => {
+	it('ignores game and counts every chosen value', () => {
+		expect(activeFilterCount({ ...EMPTY_FILTERS, game: 'poe2' })).toBe(0);
 		expect(
-			activeChipCount({
-				...EMPTY_FILTERS,
-				category: 'trade',
-				pricing: 'free',
-				code: 'open',
-				query: '   '
+			activeFilterCount({
+				game: null,
+				platforms: ['windows', 'linux'],
+				pricing: ['free'],
+				code: []
 			})
 		).toBe(3);
 	});
 });
 
+describe('toggle', () => {
+	it('adds a missing value and removes a present one', () => {
+		expect(toggle(['a'], 'b')).toEqual(['a', 'b']);
+		expect(toggle(['a', 'b'], 'a')).toEqual(['b']);
+	});
+});
+
 describe('search params', () => {
-	it('round-trips a full filter set', () => {
-		const f = {
+	it('round-trips a full filter set in a canonical order', () => {
+		const f: Filters = {
 			game: 'poe2',
-			category: 'crafting',
-			pricing: 'freemium',
-			origin: 'official',
-			code: 'closed',
-			query: 'sim'
-		} as const;
-		expect(fromSearchParams(toSearchParams(f), categories)).toEqual(f);
+			platforms: ['windows', 'linux'],
+			pricing: ['free', 'freemium'],
+			code: ['closed']
+		};
+		const p = toSearchParams({
+			...f,
+			platforms: ['linux', 'windows'],
+			pricing: ['freemium', 'free']
+		});
+		expect(p.toString()).toBe(
+			'game=poe2&platform=windows%2Clinux&price=free%2Cfreemium&code=closed'
+		);
+		expect(fromSearchParams(p)).toEqual(f);
 	});
 
 	it('omits empty values', () => {
 		expect(toSearchParams(EMPTY_FILTERS).toString()).toBe('');
 	});
 
-	it('drops values that are not valid options', () => {
-		const p = new URLSearchParams('game=poe3&cat=nope&price=cheap&from=someone&code=maybe');
-		expect(fromSearchParams(p, categories)).toEqual(EMPTY_FILTERS);
+	it('drops values that are not valid options and duplicates', () => {
+		const p = new URLSearchParams(
+			'game=poe3&platform=windows,amiga,windows&price=cheap&code=maybe'
+		);
+		expect(fromSearchParams(p)).toEqual({ ...EMPTY_FILTERS, platforms: ['windows'] });
 	});
 });

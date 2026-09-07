@@ -137,6 +137,7 @@ tools:
 
   - id: path-of-building
     name: Path of Building
+    author: Path of Building Community
     description: Offline build planner with full passive tree, skill, and gear calculations.
     url: https://pathofbuilding.community/
     games: [poe1, poe2]
@@ -186,6 +187,7 @@ tools:
 
   - id: filterblade
     name: FilterBlade
+    author: NeverSink
     description: Visual editor for the NeverSink loot filter, with live preview and league presets.
     url: https://www.filterblade.xyz/?game=Poe1
     urls:

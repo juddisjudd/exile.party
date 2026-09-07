@@ -45,27 +45,31 @@ The catalogue lives in [`tools.yaml`](tools.yaml). Adding a tool is one pull req
 
 ### Fields
 
-| Field          | Required | Notes                                                                           |
-| -------------- | -------- | ------------------------------------------------------------------------------- |
-| `id`           | yes      | kebab-case, unique                                                              |
-| `name`         | yes      | as the tool calls itself                                                        |
-| `description`  | yes      | 10 to 300 characters, plain and factual                                         |
-| `url`          | yes      | https only                                                                      |
-| `urls`         | no       | `{ poe1, poe2 }` when the games have separate pages                             |
-| `games`        | yes      | any of `poe1`, `poe2`                                                           |
-| `category`     | yes      | one of the ids under `categories:` in the same file                             |
-| `tags`         | no       | kebab-case, used by search                                                      |
-| `platforms`    | yes      | `windows`, `macos`, `linux`, `web`, `android`, `ios`                            |
-| `pricing`      | yes      | `free`, `freemium`, `paid`                                                      |
-| `openSource`   | yes      | stated outright, so a missing repo link never reads as proprietary              |
-| `source`       | no       | repository URL; only valid when `openSource` is true                            |
-| `sources`      | no       | `{ poe1, poe2 }` for projects with a repository per game                        |
-| `official`     | no       | published by Grinding Gear Games rather than the community                      |
-| `editorsPick`  | no       | what we would hand a new player first                                           |
-| `byMaintainer` | no       | written by a maintainer of this site; the card discloses it                     |
-| `status`       | yes      | `active`, `unmaintained`, `dead`                                                |
-| `lastVerified` | yes      | `YYYY-MM-DD`; entries older than six months are flagged as stale                |
-| `notes`        | no       | one caveat worth knowing, up to 300 characters                                  |
+| Field          | Required | Notes                                                                                               |
+|----------------|----------|-----------------------------------------------------------------------------------------------------|
+| `id`           | yes      | kebab-case, unique                                                                                  |
+| `name`         | yes      | as the tool calls itself                                                                            |
+| `description`  | yes      | 10 to 300 characters, plain and factual                                                             |
+| `url`          | yes      | https only                                                                                          |
+| `urls`         | no       | `{ poe1, poe2 }` when the games have separate pages                                                 |
+| `games`        | yes      | any of `poe1`, `poe2`                                                                               |
+| `category`     | yes      | one of the ids under `categories:` in the same file                                                 |
+| `tags`         | no       | kebab-case, used by search                                                                          |
+| `platforms`    | yes      | `windows`, `macos`, `linux`, `web`, `android`, `ios`                                                |
+| `pricing`      | yes      | `free`, `freemium`, `paid`                                                                          |
+| `openSource`   | yes      | stated outright, so a missing repo link never reads as proprietary                                  |
+| `source`       | no       | repository URL; only valid when `openSource` is true                                                |
+| `sources`      | no       | `{ poe1, poe2 }` for projects with a repository per game                                            |
+| `official`     | no       | published by Grinding Gear Games rather than the community                                          |
+| `editorsPick`  | no       | what we would hand a new player first                                                               |
+| `byMaintainer` | no       | written by a maintainer of this site; the card discloses it                                         |
+| `author`       | no       | who makes the tool; otherwise the GitHub owner of `source` or `url` is shown                        |
+| `headline`     | no       | one sentence for the tool page, 10 to 120 characters; otherwise the first sentence of `description` |
+| `icon`         | no       | file name under `static/icons/`, `svg`, `png` or `webp`; otherwise a monogram                       |
+| `screenshots`  | no       | list of `{ file, caption }`; files live under `static/shots/<id>/`                                  |
+| `status`       | yes      | `active`, `unmaintained`, `dead`                                                                    |
+| `lastVerified` | yes      | `YYYY-MM-DD`; entries older than six months are flagged as stale                                    |
+| `notes`        | no       | one caveat worth knowing, up to 300 characters                                                      |
 
 Listings are checked before merge. A tool does not have to be open source to be listed.
 

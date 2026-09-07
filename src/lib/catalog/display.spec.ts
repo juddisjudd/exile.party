@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { displayHost, monogram, repoLinks, siteLinks } from './display';
+import {
+	byLine,
+	displayHost,
+	headline,
+	iconUrl,
+	monogram,
+	overview,
+	repoLinks,
+	screenshotUrl,
+	siteLinks
+} from './display';
 import type { Tool } from './schema';
 
 const tool = (over: Partial<Tool>): Tool => ({
@@ -18,6 +28,7 @@ const tool = (over: Partial<Tool>): Tool => ({
 	byMaintainer: false,
 	status: 'active',
 	lastVerified: '2026-01-01',
+	screenshots: [],
 	...over
 });
 
@@ -89,5 +100,78 @@ describe('repoLinks', () => {
 			{ game: 'poe1', url: 'https://github.com/a/one' },
 			{ game: 'poe2', url: 'https://github.com/a/two' }
 		]);
+	});
+});
+
+describe('byLine', () => {
+	it('prefers the stated author', () => {
+		expect(
+			byLine(tool({ author: 'NeverSink', source: 'https://github.com/x/y', openSource: true }))
+		).toBe('NeverSink');
+	});
+	it('falls back to the GitHub owner of the repository', () => {
+		expect(
+			byLine(tool({ source: 'https://github.com/SnosMe/awakened-poe-trade', openSource: true }))
+		).toBe('SnosMe');
+	});
+	it('reads per-game repositories and then the site', () => {
+		expect(
+			byLine(
+				tool({ sources: { poe2: 'https://github.com/Kvan7/Exiled-Exchange-2' }, openSource: true })
+			)
+		).toBe('Kvan7');
+		expect(byLine(tool({ url: 'https://github.com/Barragek0/RuneshapePriceChecker' }))).toBe(
+			'Barragek0'
+		);
+	});
+	it('is null when nothing names an author', () => {
+		expect(byLine(tool({ url: 'https://poe.ninja/' }))).toBeNull();
+	});
+});
+
+describe('headline', () => {
+	it('prefers the stated headline', () => {
+		expect(headline(tool({ headline: 'Plans builds offline with the full tree' }))).toBe(
+			'Plans builds offline with the full tree'
+		);
+	});
+	it('takes the first sentence of the description without its full stop', () => {
+		expect(headline(tool({ description: 'Tracks the economy. Also shows builds.' }))).toBe(
+			'Tracks the economy'
+		);
+	});
+	it('does not split on a dot inside a name', () => {
+		expect(headline(tool({ description: 'Pulls prices from poe.ninja every hour.' }))).toBe(
+			'Pulls prices from poe.ninja every hour'
+		);
+	});
+});
+
+describe('overview', () => {
+	it('is the whole description when a headline was written', () => {
+		expect(
+			overview(tool({ headline: 'Plans builds offline', description: 'Offline planner.' }))
+		).toBe('Offline planner.');
+	});
+	it('is what follows the first sentence when the headline is derived', () => {
+		expect(
+			overview(tool({ description: 'Tracks the economy. Also shows builds. Updates hourly.' }))
+		).toBe('Also shows builds. Updates hourly.');
+	});
+	it('is null when the description is the one sentence the headline already says', () => {
+		expect(overview(tool({ description: 'Pulls prices from poe.ninja every hour.' }))).toBeNull();
+	});
+	it('keeps the description’s own closing punctuation', () => {
+		expect(overview(tool({ description: 'Tracks the economy. Worth a look!' }))).toBe(
+			'Worth a look!'
+		);
+	});
+});
+
+describe('asset urls', () => {
+	it('points icons and screenshots at static/', () => {
+		expect(iconUrl(tool({}))).toBeNull();
+		expect(iconUrl(tool({ icon: 'x.svg' }))).toBe('/icons/x.svg');
+		expect(screenshotUrl(tool({ id: 'x' }), 'home.webp')).toBe('/shots/x/home.webp');
 	});
 });

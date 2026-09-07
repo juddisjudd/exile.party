@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { GAME_LABEL } from '$lib/catalog/display';
 	import type { Game } from '$lib/catalog/schema';
@@ -7,15 +8,17 @@
 	interface Props {
 		/** Omitted outside the directory, where there is nothing to filter. */
 		game?: Game | null;
-		query?: string;
 		compact?: boolean;
 		/** On a per-game page: names the game and offers the way back to the chooser. */
 		context?: Game;
+		/** Opens the search palette. Absent on pages without one. */
+		onsearch?: () => void;
 	}
 
-	let { game = $bindable(null), query = $bindable(''), compact = false, context }: Props = $props();
+	let { game = $bindable(null), compact = false, context, onsearch }: Props = $props();
 
-	let search = $state<HTMLInputElement | null>(null);
+	/** What the palette will actually search: the route's game, else whatever the toggle says. */
+	const scope = $derived(context ?? game);
 
 	const games: { value: Game | null; label: string }[] = [
 		{ value: null, label: 'All' },
@@ -23,26 +26,12 @@
 		{ value: 'poe2', label: 'PoE 2' }
 	];
 
-	function typing(target: EventTarget | null): boolean {
-		return (
-			target instanceof HTMLElement &&
-			(target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
-		);
-	}
-
-	function onkeydown(event: KeyboardEvent) {
-		if (compact) return;
-		if (event.key === '/' && !typing(event.target)) {
-			event.preventDefault();
-			search?.focus();
-		} else if (event.key === 'Escape' && document.activeElement === search) {
-			query = '';
-			search?.blur();
-		}
-	}
+	/* Rendered as "Ctrl K" on the server and swapped after mount, so the HTML never guesses. */
+	let mac = $state(false);
+	onMount(() => {
+		mac = /Mac|iPhone|iPad/.test(navigator.platform);
+	});
 </script>
-
-<svelte:window {onkeydown} />
 
 {#snippet gameToggle()}
 	<div
@@ -99,32 +88,30 @@
 	</div>
 {/snippet}
 
-{#snippet searchBox(extra: string)}
-	<div class="relative {extra}">
+{#snippet searchButton(extra: string)}
+	<button
+		type="button"
+		onclick={onsearch}
+		class="flex h-8 min-w-0 items-center gap-2 rounded-md border border-line bg-surface pr-2 pl-2.5 text-[13px] text-faint transition-colors duration-100 hover:border-line-strong hover:text-muted {extra}"
+	>
 		<svg
 			viewBox="0 0 16 16"
 			fill="none"
 			stroke="currentColor"
 			stroke-width="1.3"
 			aria-hidden="true"
-			class="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-faint"
+			class="size-3.5 shrink-0"
 		>
 			<circle cx="7" cy="7" r="4.5" />
 			<path d="m10.5 10.5 3 3" stroke-linecap="round" />
 		</svg>
-		<input
-			bind:this={search}
-			bind:value={query}
-			type="search"
-			placeholder={context ? `Search ${GAME_LABEL[context]} tools` : 'Search tools'}
-			aria-label="Search tools"
-			class="h-8 w-full rounded-md border border-line bg-surface pr-9 pl-8 text-[13px] text-ink transition-colors duration-100 outline-none placeholder:text-faint focus:border-accent-line"
-		/>
-		<kbd
-			class="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border border-line px-1 font-sans text-[10px] text-faint sm:block"
-			>/</kbd
-		>
-	</div>
+		<span class="min-w-0 flex-1 truncate text-left">
+			{scope ? `Search ${GAME_LABEL[scope]} tools` : 'Search tools'}
+		</span>
+		<kbd class="rounded border border-line px-1 font-sans text-[10px] text-faint">
+			{mac ? '⌘' : 'Ctrl'} K
+		</kbd>
+	</button>
 {/snippet}
 
 <header class="sticky top-0 z-40 border-b border-line bg-canvas">
@@ -146,7 +133,7 @@
 
 			<div class="ml-auto flex items-center gap-3">
 				{#if !compact}
-					{@render searchBox('hidden w-56 md:block lg:w-72')}
+					{@render searchButton('hidden w-56 md:flex lg:w-72')}
 				{/if}
 				<ThemeToggle />
 			</div>
@@ -154,7 +141,7 @@
 
 		{#if !compact}
 			<div class="flex items-center gap-3 pb-3 md:hidden">
-				{@render searchBox('flex-1')}
+				{@render searchButton('flex-1')}
 				{#if context}
 					{@render contextPill(context)}
 				{:else}

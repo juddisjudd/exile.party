@@ -12,6 +12,21 @@ export const Platform = z.enum(['windows', 'macos', 'linux', 'web', 'android', '
 /** Per-game links, for tools that split PoE1 and PoE2 across separate URLs. */
 const PerGame = z.strictObject({ poe1: https.optional(), poe2: https.optional() });
 
+/** A bare file name for something under static/; no directories, so the YAML cannot point outside its folder. */
+const assetFile = (extensions: string) =>
+	z
+		.string()
+		.regex(
+			new RegExp(`^[a-z0-9-]+\\.(${extensions})$`),
+			`file name like name.${extensions.split('|')[0]}`
+		);
+
+/** Lives at static/shots/<tool id>/<file>. */
+export const Screenshot = z.strictObject({
+	file: assetFile('png|webp|jpg'),
+	caption: z.string().min(1).max(120)
+});
+
 export const Category = z.strictObject({
 	id,
 	name: z.string().min(1),
@@ -44,7 +59,15 @@ export const Tool = z
 		byMaintainer: z.boolean().default(false),
 		status: Status,
 		lastVerified: z.iso.date(),
-		notes: z.string().max(300).optional()
+		notes: z.string().max(300).optional(),
+		/** Who makes the tool, as they call themselves. Derived from the repository owner when absent. */
+		author: z.string().min(1).max(60).optional(),
+		/** A sentence about what the tool does, for the tool page headline. Derived from `description` when absent. */
+		headline: z.string().min(10).max(120).optional(),
+		/** File under static/icons. The card falls back to a monogram. */
+		icon: assetFile('svg|png|webp').optional(),
+		/** Files under static/shots/<id>/, shown on the tool page in this order. */
+		screenshots: z.array(Screenshot).default([])
 	})
 	.refine((t) => listedForEveryGame(t.urls, t.games), {
 		message: 'urls keys must be listed in games',
@@ -87,5 +110,6 @@ export type Pricing = z.infer<typeof Pricing>;
 export type Status = z.infer<typeof Status>;
 export type Platform = z.infer<typeof Platform>;
 export type Tool = z.infer<typeof Tool>;
+export type Screenshot = z.infer<typeof Screenshot>;
 export type Category = z.infer<typeof Category>;
 export type Catalog = z.infer<typeof Catalog>;

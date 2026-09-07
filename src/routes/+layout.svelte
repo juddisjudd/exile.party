@@ -1,6 +1,6 @@
 <script lang="ts">
 	import './layout.css';
-	import { beforeNavigate, goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import favicon from '$lib/assets/favicon.svg';
 	import SubmitDialog from '$lib/components/SubmitDialog.svelte';
@@ -19,6 +19,15 @@
 		if (game === null) return;
 		navigation.cancel();
 		goto(resolve('/[game=game]', { game }), { replaceState: true });
+	});
+
+	/* Smooth scrolling is for the category rail's in-page jumps. Kit's own scroll reset after a
+	   navigation, and the restore on Back, must still jump, so it is switched off for their duration. */
+	beforeNavigate(() => {
+		document.documentElement.style.scrollBehavior = 'auto';
+	});
+	afterNavigate(() => {
+		document.documentElement.style.removeProperty('scroll-behavior');
 	});
 </script>
 

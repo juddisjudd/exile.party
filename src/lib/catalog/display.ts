@@ -76,3 +76,44 @@ export const STATUS_LABEL = {
 	unmaintained: 'Unmaintained',
 	dead: 'Dead'
 } as const;
+
+const GITHUB_OWNER = /^https:\/\/github\.com\/([^/]+)\/?/;
+
+/** Who to credit: the stated author, else the GitHub owner of the repository or site, else nothing. */
+export function byLine(tool: Tool): string | null {
+	if (tool.author) return tool.author;
+	for (const url of [tool.source, tool.sources?.poe1, tool.sources?.poe2, tool.url]) {
+		const m = url?.match(GITHUB_OWNER);
+		if (m) return m[1];
+	}
+	return null;
+}
+
+/** The tool page headline: a sentence about what the tool does, with no full stop at the end. */
+export function headline(tool: Tool): string {
+	if (tool.headline) return tool.headline;
+	// A full stop followed by whitespace or the end closes the sentence; "poe.ninja" does not.
+	return tool.description
+		.trim()
+		.split(/\.(?:\s+|$)/)[0]
+		.trim();
+}
+
+/** Overview prose that the headline does not already say: the whole description when a headline
+ *  was written for the tool, else whatever follows the description's first sentence. */
+export function overview(tool: Tool): string | null {
+	if (tool.headline) return tool.description;
+	const text = tool.description.trim();
+	const end = text.match(/\.(?:\s+|$)/);
+	if (!end || end.index === undefined) return null;
+	const rest = text.slice(end.index + end[0].length).trim();
+	return rest === '' ? null : rest;
+}
+
+export function iconUrl(tool: Tool): string | null {
+	return tool.icon ? `/icons/${tool.icon}` : null;
+}
+
+export function screenshotUrl(tool: Tool, file: string): string {
+	return `/shots/${tool.id}/${file}`;
+}
