@@ -1,97 +1,97 @@
-import type { Game, Pricing, Tool } from './schema';
+import { Game, Platform, Pricing, type Tool } from './schema';
 
 export const STALE_AFTER_DAYS = 180;
 
-export type Origin = 'official' | 'community';
-export type Code = 'open' | 'closed';
+export const CODES = ['open', 'closed'] as const;
+export type Code = (typeof CODES)[number];
 
 export interface Filters {
 	game: Game | null;
-	category: string | null;
-	pricing: Pricing | null;
-	origin: Origin | null;
-	code: Code | null;
-	query: string;
+	/** Any of; an empty set is no constraint. Same for pricing and code. */
+	platforms: Platform[];
+	pricing: Pricing[];
+	code: Code[];
 }
 
-export const EMPTY_FILTERS: Filters = {
-	game: null,
-	category: null,
-	pricing: null,
-	origin: null,
-	code: null,
-	query: ''
-};
+export const EMPTY_FILTERS: Filters = { game: null, platforms: [], pricing: [], code: [] };
 
 /** `now` is the build timestamp (ISO string) so prerendered HTML matches hydration. */
 export function isStale(lastVerified: string, now: string, days = STALE_AFTER_DAYS): boolean {
 	return Date.parse(now) - Date.parse(lastVerified) > days * 864e5;
 }
 
-function matchesQuery(t: Tool, q: string): boolean {
-	return (
-		t.name.toLowerCase().includes(q) ||
-		t.description.toLowerCase().includes(q) ||
-		t.tags.some((tag) => tag.includes(q))
-	);
+function anyOf<T>(set: readonly T[], value: T): boolean {
+	return set.length === 0 || set.includes(value);
 }
 
 export function filterTools(tools: readonly Tool[], f: Filters): Tool[] {
-	const q = f.query.trim().toLowerCase();
 	return tools.filter(
 		(t) =>
 			(f.game === null || t.games.includes(f.game)) &&
-			(f.category === null || t.category === f.category) &&
-			(f.pricing === null || t.pricing === f.pricing) &&
-			(f.origin === null || (f.origin === 'official') === t.official) &&
-			(f.code === null || (f.code === 'open') === t.openSource) &&
-			(q === '' || matchesQuery(t, q))
+			(f.platforms.length === 0 || t.platforms.some((p) => f.platforms.includes(p))) &&
+			anyOf(f.pricing, t.pricing) &&
+			anyOf(f.code, t.openSource ? 'open' : 'closed')
 	);
 }
 
-/** Game lives in the top bar and is always set, so it does not count as a chip. */
-export function activeChipCount(f: Filters): number {
-	return (
-		(f.category === null ? 0 : 1) +
-		(f.pricing === null ? 0 : 1) +
-		(f.origin === null ? 0 : 1) +
-		(f.code === null ? 0 : 1) +
-		(f.query.trim() === '' ? 0 : 1)
-	);
+/** Palette rank: name start, name, tag, description. 4 is no match. */
+function rank(t: Tool, q: string): number {
+	const name = t.name.toLowerCase();
+	if (name.startsWith(q)) return 0;
+	if (name.includes(q)) return 1;
+	if (t.tags.some((tag) => tag.includes(q))) return 2;
+	if (t.description.toLowerCase().includes(q)) return 3;
+	return 4;
 }
 
-const KEYS = {
-	game: 'game',
-	category: 'cat',
-	pricing: 'price',
-	origin: 'from',
-	code: 'code',
-	query: 'q'
-} as const;
+/** Ranked matches for the search palette. A blank query finds nothing. */
+export function searchTools(tools: readonly Tool[], query: string): Tool[] {
+	const q = query.trim().toLowerCase();
+	if (q === '') return [];
+	return tools
+		.map((t) => ({ t, r: rank(t, q) }))
+		.filter((x) => x.r < 4)
+		.sort((a, b) => a.r - b.r || a.t.name.localeCompare(b.t.name))
+		.map((x) => x.t);
+}
+
+/** Game lives in the top bar, so it does not count. */
+export function activeFilterCount(f: Filters): number {
+	return f.platforms.length + f.pricing.length + f.code.length;
+}
+
+export function toggle<T>(list: readonly T[], value: T): T[] {
+	return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
+
+const KEYS = { game: 'game', platforms: 'platform', pricing: 'price', code: 'code' } as const;
+
+/** Schema order, so the same selection always gives the same URL. */
+function canonical<T extends string>(set: readonly T[], allowed: readonly T[]): string {
+	return allowed.filter((a) => set.includes(a)).join(',');
+}
 
 /** Filters round-trip through the querystring so a filtered view is shareable. */
 export function toSearchParams(f: Filters): URLSearchParams {
 	const p = new URLSearchParams();
 	if (f.game) p.set(KEYS.game, f.game);
-	if (f.category) p.set(KEYS.category, f.category);
-	if (f.pricing) p.set(KEYS.pricing, f.pricing);
-	if (f.origin) p.set(KEYS.origin, f.origin);
-	if (f.code) p.set(KEYS.code, f.code);
-	if (f.query.trim()) p.set(KEYS.query, f.query.trim());
+	if (f.platforms.length) p.set(KEYS.platforms, canonical(f.platforms, Platform.options));
+	if (f.pricing.length) p.set(KEYS.pricing, canonical(f.pricing, Pricing.options));
+	if (f.code.length) p.set(KEYS.code, canonical(f.code, CODES));
 	return p;
 }
 
-function pick<T extends string>(v: string | null, allowed: readonly T[]): T | null {
-	return v !== null && (allowed as readonly string[]).includes(v) ? (v as T) : null;
+function pickSet<T extends string>(v: string | null, allowed: readonly T[]): T[] {
+	const parts = new Set((v ?? '').split(','));
+	return allowed.filter((a) => parts.has(a));
 }
 
-export function fromSearchParams(p: URLSearchParams, categories: readonly string[]): Filters {
+export function fromSearchParams(p: URLSearchParams): Filters {
+	const game = Game.safeParse(p.get(KEYS.game));
 	return {
-		game: pick(p.get(KEYS.game), ['poe1', 'poe2'] as const),
-		category: pick(p.get(KEYS.category), categories),
-		pricing: pick(p.get(KEYS.pricing), ['free', 'freemium', 'paid'] as const),
-		origin: pick(p.get(KEYS.origin), ['official', 'community'] as const),
-		code: pick(p.get(KEYS.code), ['open', 'closed'] as const),
-		query: p.get(KEYS.query) ?? ''
+		game: game.success ? game.data : null,
+		platforms: pickSet(p.get(KEYS.platforms), Platform.options),
+		pricing: pickSet(p.get(KEYS.pricing), Pricing.options),
+		code: pickSet(p.get(KEYS.code), CODES)
 	};
 }
