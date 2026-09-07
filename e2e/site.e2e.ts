@@ -10,15 +10,15 @@ test('a game page is the directory locked to that game', async ({ page }) => {
 
 test('a game page filter round-trips through the URL without a game param', async ({ page }) => {
 	await page.goto('/poe1');
-	// Scoped to main: ScrollDots renders its own same-named "Trade" jump link outside it.
-	const trade = page.locator('main').getByRole('button', { name: /^Trade/ });
-	await trade.click();
-	await expect(page).toHaveURL(/\/poe1\?cat=trade$/);
+	await page.getByRole('button', { name: /^Filters/ }).click();
+	// A string matches the label's normalised text; a regex would be tested against the raw
+	// " Open source 6", so an anchored one never matches. "Closed source" does not contain this.
+	await page.getByLabel('Open source').check();
+	await expect(page).toHaveURL(/\/poe1\?code=open$/);
 	await page.reload();
-	await expect(page.locator('main').getByRole('button', { name: /^Trade/ })).toHaveAttribute(
-		'aria-pressed',
-		'true'
-	);
+	await page.getByRole('button', { name: /^Filters/ }).click();
+	await expect(page.getByLabel('Open source')).toBeChecked();
+	await expect(page.locator('main p.tabular-nums').first()).toContainText('of');
 });
 
 test('the chooser offers both games with live counts', async ({ page }) => {
@@ -111,18 +111,33 @@ test('the footer reaches the maintainers page', async ({ page }) => {
 test('a game page only lists tools for that game', async ({ page }) => {
 	await page.goto('/poe2');
 	await expect(page.locator('h1')).toHaveText('Path of Exile 2 tools');
-	const cards = page.locator('main li.group');
+	const cards = page.locator('main li[data-games]');
 	await expect(cards.first()).toBeVisible();
 	const count = await cards.count();
-	for (let i = 0; i < count; i++) await expect(cards.nth(i)).toContainText('PoE 2');
+	for (let i = 0; i < count; i++) {
+		await expect(cards.nth(i)).toHaveAttribute('data-games', /\bpoe2\b/);
+	}
 });
 
-test('the game page search filters in place', async ({ page }) => {
+test('the search palette opens on Control+K and jumps to a tool', async ({ page }) => {
 	await page.goto('/poe1');
-	const search = page.getByLabel('Search tools').first();
-	await search.fill('awakened');
-	await expect(page).toHaveURL(/\/poe1\?q=awakened$/);
-	await expect(page.locator('main li.group')).toHaveCount(1);
+	await page.keyboard.press('Control+k');
+	const box = page.getByRole('combobox', { name: 'Search tools' });
+	await expect(box).toBeFocused();
+	await box.fill('awakened');
+	await expect(page.getByRole('option', { name: /Awakened PoE Trade/ })).toBeVisible();
+	await page.keyboard.press('Enter');
+	await expect(page).toHaveURL(/\/tools\/awakened-poe-trade$/);
+});
+
+test('the category rail jumps to its section', async ({ page }) => {
+	await page.goto('/tools');
+	await page
+		.getByRole('navigation', { name: 'Categories' })
+		.getByRole('link', { name: /^Trade/ })
+		.click();
+	await expect(page).toHaveURL(/\/tools#cat-trade$/);
+	await expect(page.locator('#cat-trade')).toBeInViewport();
 });
 
 test('the switch-game link reaches the chooser with the escape-hatch querystring', async ({
@@ -202,8 +217,10 @@ test('back from a picked game does not trap the visitor', async ({ page }) => {
 	// Scoped to main: the chooser's own h1 can still be mid-outro from the earlier pick.
 	await expect(page.locator('main h1')).toHaveText('Path of Exile tools');
 	await expect(page.getByRole('group', { name: 'Game' }).first()).toContainText('PoE 1');
-	const cards = page.locator('main li.group');
+	const cards = page.locator('main li[data-games]');
 	await expect(cards.first()).toBeVisible();
 	const count = await cards.count();
-	for (let i = 0; i < count; i++) await expect(cards.nth(i)).toContainText('PoE 1');
+	for (let i = 0; i < count; i++) {
+		await expect(cards.nth(i)).toHaveAttribute('data-games', /\bpoe1\b/);
+	}
 });

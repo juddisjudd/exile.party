@@ -22,6 +22,8 @@
 		/* The directory replaces the scrollbar with a step control; hiding it only there would
 		   put the page-to-page alignment shift back, so it goes site-wide. */
 		scrollbar-width: none;
+		/* The category rail is fragment links; the jump glides unless the OS says otherwise. */
+		scroll-behavior: smooth;
 	}
 
 	html::-webkit-scrollbar,
@@ -85,6 +87,10 @@
 		::after {
 			transition-duration: 0.01ms !important;
 			animation-duration: 0.01ms !important;
+		}
+
+		html {
+			scroll-behavior: auto;
 		}
 	}
 }
