@@ -38,6 +38,11 @@
 		}
 	});
 
+	// Removing an open <dialog> from the DOM (e.g. a client-side route change while the
+	// palette is open) never fires `close`, so `onclose` below never runs. Without this,
+	// the store stays open and the next page's fresh palette pops open unrequested.
+	$effect(() => () => searchPalette.hide());
+
 	// A new result list starts from the top.
 	$effect(() => {
 		void results;
@@ -71,13 +76,21 @@
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
 			if (results.length) cursor = (cursor + 1) % results.length;
+			scrollToActive();
 		} else if (event.key === 'ArrowUp') {
 			event.preventDefault();
 			if (results.length) cursor = (cursor - 1 + results.length) % results.length;
+			scrollToActive();
 		} else if (event.key === 'Enter' && current) {
 			event.preventDefault();
 			pick(current);
 		}
+	}
+
+	/** The APG combobox pattern requires the active option to stay in view as the cursor moves. */
+	function scrollToActive() {
+		if (!results.length) return;
+		document.getElementById(`search-${results[cursor].id}`)?.scrollIntoView({ block: 'nearest' });
 	}
 
 	/** <dialog> counts the backdrop as part of itself, so a click on it lands on the element. */
