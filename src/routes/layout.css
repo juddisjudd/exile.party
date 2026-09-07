@@ -17,7 +17,7 @@
 
 	html {
 		background-color: var(--canvas);
-		/* Fallback alignment for browsers that ignore the scrollbar-width below. */
+		/* Reserves the scrollbar's width on every page, so a short page and a long page line up. */
 		scrollbar-gutter: stable;
 		/* The category rail is fragment links; the jump glides unless the OS says otherwise. */
 		scroll-behavior: smooth;

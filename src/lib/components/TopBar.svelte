@@ -17,6 +17,9 @@
 
 	let { game = $bindable(null), compact = false, context, onsearch }: Props = $props();
 
+	/** What the palette will actually search: the route's game, else whatever the toggle says. */
+	const scope = $derived(context ?? game);
+
 	const games: { value: Game | null; label: string }[] = [
 		{ value: null, label: 'All' },
 		{ value: 'poe1', label: 'PoE 1' },
@@ -89,7 +92,7 @@
 	<button
 		type="button"
 		onclick={onsearch}
-		class="flex h-8 items-center gap-2 rounded-md border border-line bg-surface pr-2 pl-2.5 text-[13px] text-faint transition-colors duration-100 hover:border-line-strong hover:text-muted {extra}"
+		class="flex h-8 min-w-0 items-center gap-2 rounded-md border border-line bg-surface pr-2 pl-2.5 text-[13px] text-faint transition-colors duration-100 hover:border-line-strong hover:text-muted {extra}"
 	>
 		<svg
 			viewBox="0 0 16 16"
@@ -102,8 +105,8 @@
 			<circle cx="7" cy="7" r="4.5" />
 			<path d="m10.5 10.5 3 3" stroke-linecap="round" />
 		</svg>
-		<span class="flex-1 text-left">
-			{context ? `Search ${GAME_LABEL[context]} tools` : 'Search tools'}
+		<span class="min-w-0 flex-1 truncate text-left">
+			{scope ? `Search ${GAME_LABEL[scope]} tools` : 'Search tools'}
 		</span>
 		<kbd class="rounded border border-line px-1 font-sans text-[10px] text-faint">
 			{mac ? '⌘' : 'Ctrl'} K

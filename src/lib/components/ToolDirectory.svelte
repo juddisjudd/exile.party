@@ -23,13 +23,10 @@
 
 	interface Props {
 		catalog: Catalog;
-		/** Both routes still pass it; nothing on this page is time-based any more. */
-		builtAt: string;
 		/** Fixes the game to a route, e.g. `/poe1`. Unset on `/tools`, where the toggle picks it. */
 		lock?: Game;
 	}
 
-	// eslint-disable-next-line svelte/no-unused-props -- builtAt stays declared so the routes keep type-checking
 	let { catalog, lock }: Props = $props();
 
 	// svelte-ignore state_referenced_locally (lock is fixed for the life of the component: the game page keys on it.)
@@ -119,8 +116,10 @@
 		</div>
 	</div>
 
-	<div class="mt-6 grid gap-x-10 gap-y-6 lg:mt-8 lg:grid-cols-[208px_minmax(0,1fr)]">
-		<div class="lg:sticky lg:top-20 lg:self-start">
+	<div
+		class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-x-10 gap-y-6 lg:mt-8 lg:grid-cols-[232px_minmax(0,1fr)]"
+	>
+		<div class="min-w-0 lg:sticky lg:top-20 lg:self-start">
 			<CategoryRail items={rail} />
 		</div>
 
@@ -141,7 +140,7 @@
 					{@const preview = expanded.includes(group.id)
 						? { shown: group.tools, hidden: 0 }
 						: sectionPreview(group.tools)}
-					<section id="cat-{group.id}" class="scroll-mt-20 {i > 0 ? 'mt-12' : ''}">
+					<section id="cat-{group.id}" class="scroll-mt-28 md:scroll-mt-20 {i > 0 ? 'mt-12' : ''}">
 						<div class="mb-4">
 							<h2 class="text-[15px] leading-tight font-medium tracking-tight text-ink">
 								{group.name}

@@ -17,10 +17,14 @@
 
 	let active = $state<string | null>(null);
 
-	/** Sits below the sticky header, so a section counts as reached once it clears the bar. */
-	const LINE = 96;
+	/** The section counts as reached once its top clears the sticky bar plus a little air. */
+	function line(): number {
+		const header = document.querySelector('header');
+		return (header?.getBoundingClientRect().height ?? 80) + 16;
+	}
 
 	function measure() {
+		const LINE = line();
 		const y = scrollY;
 		// The last sections can never reach the line, because the page stops scrolling first.
 		// Comparing against the clamped landing position lets them still count as reached.

@@ -12,4 +12,4 @@
 	path="/tools"
 />
 
-<ToolDirectory catalog={data.catalog} builtAt={data.builtAt} />
+<ToolDirectory catalog={data.catalog} />
