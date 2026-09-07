@@ -22,10 +22,7 @@ const assetFile = (extensions: string) =>
 		);
 
 /** Lives at static/shots/<tool id>/<file>. */
-export const Screenshot = z.strictObject({
-	file: assetFile('png|webp|jpg'),
-	caption: z.string().min(1).max(120)
-});
+const screenshotFile = assetFile('png|webp|jpg');
 
 export const Category = z.strictObject({
 	id,
@@ -67,7 +64,7 @@ export const Tool = z
 		/** File under static/icons. The card falls back to a monogram. */
 		icon: assetFile('svg|png|webp').optional(),
 		/** Files under static/shots/<id>/, shown on the tool page in this order. */
-		screenshots: z.array(Screenshot).default([])
+		screenshots: z.array(screenshotFile).default([])
 	})
 	.refine((t) => listedForEveryGame(t.urls, t.games), {
 		message: 'urls keys must be listed in games',
@@ -110,6 +107,5 @@ export type Pricing = z.infer<typeof Pricing>;
 export type Status = z.infer<typeof Status>;
 export type Platform = z.infer<typeof Platform>;
 export type Tool = z.infer<typeof Tool>;
-export type Screenshot = z.infer<typeof Screenshot>;
 export type Category = z.infer<typeof Category>;
 export type Catalog = z.infer<typeof Catalog>;

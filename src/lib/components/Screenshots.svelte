@@ -22,18 +22,15 @@
 			bind:this={strip}
 			class="flex snap-x snap-mandatory [scrollbar-width:none] gap-4 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden"
 		>
-			{#each tool.screenshots as shot (shot.file)}
+			{#each tool.screenshots as shot (shot)}
 				<li class="w-full shrink-0 snap-start">
-					<figure>
-						<img
-							src={screenshotUrl(tool, shot.file)}
-							alt={shot.caption}
-							loading="lazy"
-							decoding="async"
-							class="aspect-[16/10] w-full rounded-lg border border-line bg-raised object-cover"
-						/>
-						<figcaption class="mt-2 text-[12.5px] text-faint">{shot.caption}</figcaption>
-					</figure>
+					<img
+						src={screenshotUrl(tool, shot)}
+						alt="{tool.name} screenshot"
+						loading="lazy"
+						decoding="async"
+						class="aspect-[16/10] w-full rounded-lg border border-line bg-raised object-contain"
+					/>
 				</li>
 			{/each}
 		</ul>

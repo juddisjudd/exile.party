@@ -64,7 +64,7 @@ describe('Tool', () => {
 			author: 'Example Person',
 			headline: 'Does a useful thing for exiles without leaving the game',
 			icon: 'example-tool.svg',
-			screenshots: [{ file: 'home.webp', caption: 'The main screen' }]
+			screenshots: ['home.webp']
 		});
 		expect(r.success).toBe(true);
 	});
@@ -72,8 +72,7 @@ describe('Tool', () => {
 	it.each([
 		['icon with a path', { ...valid, icon: 'icons/example.svg' }],
 		['icon with a bad extension', { ...valid, icon: 'example.gif' }],
-		['screenshot without a caption', { ...valid, screenshots: [{ file: 'a.png' }] }],
-		['screenshot with a path', { ...valid, screenshots: [{ file: '../a.png', caption: 'x' }] }],
+		['screenshot with a path', { ...valid, screenshots: ['../a.png'] }],
 		['short headline', { ...valid, headline: 'Too short' }],
 		['empty author', { ...valid, author: '' }]
 	])('rejects %s', (_, input) => {
