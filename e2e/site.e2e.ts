@@ -1,4 +1,13 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
+
+/** Retries an action until its effect shows, so a keystroke or click that lands before hydration
+ *  has attached listeners is simply sent again. */
+async function untilVisible(act: () => Promise<void>, effect: Locator) {
+	await expect(async () => {
+		await act();
+		await expect(effect).toBeVisible({ timeout: 1000 });
+	}).toPass();
+}
 
 test('a game page is the directory locked to that game', async ({ page }) => {
 	await page.goto('/poe1');
@@ -10,13 +19,14 @@ test('a game page is the directory locked to that game', async ({ page }) => {
 
 test('a game page filter round-trips through the URL without a game param', async ({ page }) => {
 	await page.goto('/poe1');
-	await page.getByRole('button', { name: /^Filters/ }).click();
+	const filtersButton = page.getByRole('button', { name: /^Filters/ });
+	await untilVisible(() => filtersButton.click(), page.locator('#filters-panel'));
 	// A string matches the label's normalised text; a regex would be tested against the raw
 	// " Open source 6", so an anchored one never matches. "Closed source" does not contain this.
 	await page.getByLabel('Open source').check();
 	await expect(page).toHaveURL(/\/poe1\?code=open$/);
 	await page.reload();
-	await page.getByRole('button', { name: /^Filters/ }).click();
+	await untilVisible(() => filtersButton.click(), page.locator('#filters-panel'));
 	await expect(page.getByLabel('Open source')).toBeChecked();
 	await expect(page.locator('main p.tabular-nums').first()).toContainText('of');
 });
@@ -70,6 +80,7 @@ test('tool page loads from the directory', async ({ page }) => {
 	const name = (await first.textContent())!.trim();
 	await first.click();
 	await expect(page).toHaveTitle(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} `));
+	await expect(page.locator('h1')).not.toBeEmpty();
 	await expect(page.locator('main')).toContainText(name);
 	await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Open tool' })).toBeVisible();
@@ -125,11 +136,15 @@ test('a game page only lists tools for that game', async ({ page }) => {
 
 test('the search palette opens on Control+K and jumps to a tool', async ({ page }) => {
 	await page.goto('/poe1');
-	await page.keyboard.press('Control+k');
 	const box = page.getByRole('combobox', { name: 'Search tools' });
+	await untilVisible(() => page.keyboard.press('Control+k'), box);
 	await expect(box).toBeFocused();
 	await box.fill('awakened');
 	await expect(page.getByRole('option', { name: /Awakened PoE Trade/ })).toBeVisible();
+	await expect(page.getByRole('option', { name: /Awakened PoE Trade/ })).toHaveAttribute(
+		'aria-selected',
+		'true'
+	);
 	await page.keyboard.press('Enter');
 	await expect(page).toHaveURL(/\/tools\/awakened-poe-trade$/);
 });
