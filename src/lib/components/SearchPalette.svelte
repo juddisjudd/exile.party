@@ -162,7 +162,7 @@
 					role="option"
 					aria-selected={i === cursor}
 					tabindex="-1"
-					onclick={() => pick(tool)}
+					onclick={() => void pick(tool)}
 					onkeydown={onrowkeydown}
 					onpointermove={() => (cursor = i)}
 					class="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 {i === cursor

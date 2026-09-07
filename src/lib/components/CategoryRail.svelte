@@ -17,14 +17,7 @@
 
 	let active = $state<string | null>(null);
 
-	/** The section counts as reached once its top clears the sticky bar plus a little air. */
-	function line(): number {
-		const header = document.querySelector('header');
-		return (header?.getBoundingClientRect().height ?? 80) + 16;
-	}
-
 	function measure() {
-		const LINE = line();
 		const y = scrollY;
 		// The last sections can never reach the line, because the page stops scrolling first.
 		// Comparing against the clamped landing position lets them still count as reached.
@@ -34,7 +27,9 @@
 		for (const item of items) {
 			const el = document.getElementById(`cat-${item.id}`);
 			if (!el) continue;
-			const landing = Math.min(el.getBoundingClientRect().top + y - LINE, furthest);
+			// The same margin the fragment jump uses, so "reached" means exactly where a jump lands.
+			const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+			const landing = Math.min(el.getBoundingClientRect().top + y - margin, furthest);
 			if (y >= landing - 2) next = item.id;
 		}
 		active = next ?? items.find((i) => i.count > 0)?.id ?? null;

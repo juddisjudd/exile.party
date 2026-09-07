@@ -103,14 +103,11 @@ export function headline(tool: Tool): string {
  *  was written for the tool, else whatever follows the description's first sentence. */
 export function overview(tool: Tool): string | null {
 	if (tool.headline) return tool.description;
-	// Split on the same rule headline() uses, so the two always agree on where sentence one ends.
-	const rest = tool.description
-		.trim()
-		.split(/\.(?:\s+|$)/)
-		.slice(1)
-		.map((s) => s.trim())
-		.filter((s) => s !== '');
-	return rest.length === 0 ? null : `${rest.join('. ')}.`;
+	const text = tool.description.trim();
+	const end = text.match(/\.(?:\s+|$)/);
+	if (!end || end.index === undefined) return null;
+	const rest = text.slice(end.index + end[0].length).trim();
+	return rest === '' ? null : rest;
 }
 
 export function iconUrl(tool: Tool): string | null {

@@ -1,10 +1,11 @@
 import { expect, test, type Locator } from '@playwright/test';
 
 /** Retries an action until its effect shows, so a keystroke or click that lands before hydration
- *  has attached listeners is simply sent again. */
+ *  has attached listeners is simply sent again. Both uses are toggles, so once the effect is
+ *  already visible the action is skipped rather than re-sent, which would toggle it back off. */
 async function untilVisible(act: () => Promise<void>, effect: Locator) {
 	await expect(async () => {
-		await act();
+		if (!(await effect.isVisible())) await act();
 		await expect(effect).toBeVisible({ timeout: 1000 });
 	}).toPass();
 }

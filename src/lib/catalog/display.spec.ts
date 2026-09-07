@@ -161,6 +161,11 @@ describe('overview', () => {
 	it('is null when the description is the one sentence the headline already says', () => {
 		expect(overview(tool({ description: 'Pulls prices from poe.ninja every hour.' }))).toBeNull();
 	});
+	it('keeps the description’s own closing punctuation', () => {
+		expect(overview(tool({ description: 'Tracks the economy. Worth a look!' }))).toBe(
+			'Worth a look!'
+		);
+	});
 });
 
 describe('asset urls', () => {
