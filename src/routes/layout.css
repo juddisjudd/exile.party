@@ -19,16 +19,8 @@
 		background-color: var(--canvas);
 		/* Fallback alignment for browsers that ignore the scrollbar-width below. */
 		scrollbar-gutter: stable;
-		/* The directory replaces the scrollbar with a step control; hiding it only there would
-		   put the page-to-page alignment shift back, so it goes site-wide. */
-		scrollbar-width: none;
 		/* The category rail is fragment links; the jump glides unless the OS says otherwise. */
 		scroll-behavior: smooth;
-	}
-
-	html::-webkit-scrollbar,
-	body::-webkit-scrollbar {
-		display: none;
 	}
 
 	body {
