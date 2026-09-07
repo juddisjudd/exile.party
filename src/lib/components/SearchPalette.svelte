@@ -83,7 +83,7 @@
 			scrollToActive();
 		} else if (event.key === 'Enter' && current) {
 			event.preventDefault();
-			pick(current);
+			void pick(current);
 		}
 	}
 
@@ -132,7 +132,7 @@
 			aria-label="Search tools"
 			role="combobox"
 			aria-expanded={results.length > 0}
-			aria-controls="search-results"
+			aria-controls={results.length > 0 ? 'search-results' : undefined}
 			aria-activedescendant={current ? `search-${current.id}` : undefined}
 			aria-autocomplete="list"
 			autocomplete="off"
@@ -145,7 +145,9 @@
 	{#if query.trim() === ''}
 		<p class="px-4 py-8 text-center text-[13px] text-faint">Type to search {tools.length} tools</p>
 	{:else if results.length === 0}
-		<p class="px-4 py-8 text-center text-[13px] text-faint">Nothing matches “{query.trim()}”</p>
+		<p role="status" class="px-4 py-8 text-center text-[13px] text-faint">
+			Nothing matches “{query.trim()}”
+		</p>
 	{:else}
 		<ul
 			id="search-results"

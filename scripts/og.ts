@@ -116,7 +116,7 @@ async function main() {
 			file: 'tools.png',
 			html: pageCard(
 				'All tools',
-				`${catalog.tools.length} tools across ${catalog.categories.length} categories. Filter by game, category, price, and licence.`,
+				`${catalog.tools.length} tools across ${catalog.categories.length} categories. Filter by game, platform, price, and licence.`,
 				'Directory'
 			)
 		},
@@ -132,7 +132,7 @@ async function main() {
 			file: `${game}.png`,
 			html: pageCard(
 				`${GAME_NAME[game]} tools`,
-				`${counts[game]} community tools for ${GAME_NAME[game]}, filterable by category, platform, price, and licence.`,
+				`${counts[game]} community tools for ${GAME_NAME[game]}, filterable by platform, price, and licence.`,
 				GAME_NAME[game]
 			)
 		}))
