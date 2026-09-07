@@ -66,10 +66,14 @@ test('directory lists tool cards', async ({ page }) => {
 
 test('tool page loads from the directory', async ({ page }) => {
 	await page.goto('/tools');
-	const first = page.locator('a[href^="/tools/"]').first();
-	const name = await first.textContent();
+	const first = page.locator('main li[data-games] a[href^="/tools/"]').first();
+	const name = (await first.textContent())!.trim();
 	await first.click();
-	await expect(page.locator('h1')).toHaveText(name!.trim());
+	await expect(page).toHaveTitle(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} `));
+	await expect(page.locator('main')).toContainText(name);
+	await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Open tool' })).toBeVisible();
+	await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Tools');
 });
 
 test('unknown tool id is a 404', async ({ page }) => {
