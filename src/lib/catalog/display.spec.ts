@@ -5,6 +5,7 @@ import {
 	headline,
 	iconUrl,
 	monogram,
+	overview,
 	repoLinks,
 	screenshotUrl,
 	siteLinks
@@ -143,6 +144,22 @@ describe('headline', () => {
 		expect(headline(tool({ description: 'Pulls prices from poe.ninja every hour.' }))).toBe(
 			'Pulls prices from poe.ninja every hour'
 		);
+	});
+});
+
+describe('overview', () => {
+	it('is the whole description when a headline was written', () => {
+		expect(
+			overview(tool({ headline: 'Plans builds offline', description: 'Offline planner.' }))
+		).toBe('Offline planner.');
+	});
+	it('is what follows the first sentence when the headline is derived', () => {
+		expect(
+			overview(tool({ description: 'Tracks the economy. Also shows builds. Updates hourly.' }))
+		).toBe('Also shows builds. Updates hourly.');
+	});
+	it('is null when the description is the one sentence the headline already says', () => {
+		expect(overview(tool({ description: 'Pulls prices from poe.ninja every hour.' }))).toBeNull();
 	});
 });
 

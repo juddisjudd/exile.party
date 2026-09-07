@@ -99,6 +99,20 @@ export function headline(tool: Tool): string {
 		.trim();
 }
 
+/** Overview prose that the headline does not already say: the whole description when a headline
+ *  was written for the tool, else whatever follows the description's first sentence. */
+export function overview(tool: Tool): string | null {
+	if (tool.headline) return tool.description;
+	// Split on the same rule headline() uses, so the two always agree on where sentence one ends.
+	const rest = tool.description
+		.trim()
+		.split(/\.(?:\s+|$)/)
+		.slice(1)
+		.map((s) => s.trim())
+		.filter((s) => s !== '');
+	return rest.length === 0 ? null : `${rest.join('. ')}.`;
+}
+
 export function iconUrl(tool: Tool): string | null {
 	return tool.icon ? `/icons/${tool.icon}` : null;
 }

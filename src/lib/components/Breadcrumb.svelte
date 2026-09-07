@@ -14,7 +14,8 @@
 
 <nav aria-label="Breadcrumb">
 	<ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-faint">
-		{#each items as item, i (item.label)}
+		<!-- eslint-disable-next-line svelte/require-each-key -- nothing on a crumb is unique (a tool may be named after its category), and the trail is a fixed list rebuilt per page, so index order is the key -->
+		{#each items as item, i}
 			<li class="flex items-center gap-2">
 				{#if i > 0}
 					<span aria-hidden="true" class="text-faint/60">/</span>
