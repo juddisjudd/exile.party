@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import type { Game } from '$lib/catalog/schema';
 	import GamePanel from '$lib/components/GamePanel.svelte';
+	import Mark from '$lib/components/Mark.svelte';
 	import Meta from '$lib/components/Meta.svelte';
 	import { gameStore, rememberGame } from '$lib/game';
 	import { cubicOut } from 'svelte/easing';
@@ -80,8 +81,9 @@
 	<!-- On desktop the band floats over the art; only its link takes pointer events. -->
 	<div class="band pointer-events-none relative z-10 md:absolute md:inset-x-0 md:top-0">
 		<header class="flex h-14 items-center justify-between px-5 md:px-8">
-			<span class="text-[15px] font-medium tracking-tight text-ink">
-				exile<span class="text-faint">.</span>party
+			<span class="flex items-center gap-2 text-[15px] font-medium tracking-tight text-ink">
+				<Mark />
+				<span>exile<span class="text-faint">.</span>party</span>
 			</span>
 			<a
 				href={resolve('/tools')}

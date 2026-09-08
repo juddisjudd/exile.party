@@ -22,6 +22,13 @@
 	--accent-on-fill: #ffffff;
 	--accent-tint: #e9ecfb;
 	--accent-line: rgb(10 33 192 / 0.28);
+
+	/* The mark's own colours. Constants, so the dark blocks below leave them alone: a dark tile on
+	   the light canvas, a floating glyph on the dark one. favicon.svg carries the same three values
+	   by hand, since it cannot read these. */
+	--brand-tile: #141619;
+	--brand-glyph: #bed7d7;
+	--brand-dot: #7b8ff0;
 }
 
 /* System preference. Loses to an explicit [data-theme] choice in either direction. */
@@ -98,6 +105,10 @@
 	--color-accent-on-fill: var(--accent-on-fill);
 	--color-accent-tint: var(--accent-tint);
 	--color-accent-line: var(--accent-line);
+
+	--color-brand-tile: var(--brand-tile);
+	--color-brand-glyph: var(--brand-glyph);
+	--color-brand-dot: var(--brand-dot);
 
 	--font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 	--font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
