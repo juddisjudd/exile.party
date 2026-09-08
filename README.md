@@ -21,7 +21,14 @@ The catalogue lives in [`tools/`](tools). Adding a tool is one pull request with
 1. Fork this repository, or use
    [the new-file link](https://github.com/poetoollist/exile.party/new/main/tools?filename=your-tool%2Fabout.yaml)
    and GitHub will fork it for you.
-2. Create `tools/your-tool/about.yaml`. The directory name is the tool's kebab-case id:
+2. From a local checkout, run the interactive scaffolder. It asks required fields first, then
+   optional and conditional fields, and derives the kebab-case directory id from the name:
+
+   ```bash
+   bun run new-tool
+   ```
+
+   Alternatively, create `tools/your-tool/about.yaml` by hand:
 
    ```yaml
    name: Your Tool
@@ -84,15 +91,16 @@ bun run dev
 
 | Command             | Does                                                       |
 | ------------------- | ---------------------------------------------------------- |
-| `bun run dev`       | dev server                                                 |
-| `bun run build`     | generates OG images, then builds the static site to `build` |
-| `bun run preview`   | serves the built site                                      |
-| `bun run validate`  | checks tool metadata and collocated assets                 |
-| `bun run og`        | regenerates the OG images and the banner above             |
-| `bun run lint`      | prettier and eslint                                        |
-| `bun run check`     | svelte-check                                               |
-| `bun run test`      | unit tests                                                 |
-| `bun run test:e2e`  | Playwright tests                                           |
+| `bun run dev`       | dev server                                                   |
+| `bun run new-tool`  | interactively scaffolds `tools/<id>/about.yaml`              |
+| `bun run build`     | generates OG images, then builds the static site to `build`   |
+| `bun run preview`   | serves the built site                                        |
+| `bun run validate`  | checks tool metadata and collocated assets                   |
+| `bun run og`        | regenerates the OG images and the banner above               |
+| `bun run lint`      | prettier and eslint                                          |
+| `bun run check`     | svelte-check                                                 |
+| `bun run test`      | unit tests                                                   |
+| `bun run test:e2e`  | Playwright tests                                             |
 
 Built with SvelteKit and Tailwind, prerendered to static files by `adapter-static`. Metadata is
 loaded from `tools/*/about.yaml` and validated with Zod at build time, so a malformed entry fails

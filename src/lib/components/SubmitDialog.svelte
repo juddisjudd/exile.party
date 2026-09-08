@@ -97,10 +97,12 @@ lastVerified: ${new Date().toISOString().slice(0, 10)}`;
 			</li>
 			<li class="flex gap-3">
 				<span class="shrink-0 font-mono text-[12px] text-faint">2</span>
-				<span
-					>Create the directory and add its <code class="font-mono text-[12.5px]">about.yaml</code
-					>:</span
-				>
+				<span>
+					Run
+					<code class="font-mono text-[12.5px] text-ink">bun run new-tool</code>
+					for an interactive scaffold, or create the directory and
+					<code class="font-mono text-[12.5px]">about.yaml</code> manually:
+				</span>
 			</li>
 		</ol>
 
