@@ -578,6 +578,7 @@ tools:
     notes: >-
       Ad-supported. Layouts change at the daily server reset, and the site's bot protection may show
       a verification screen first.
+    icon: poelab.png
 
   - id: r-pathofexile
     name: r/pathofexile
