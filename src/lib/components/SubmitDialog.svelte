@@ -97,10 +97,12 @@ lastVerified: ${new Date().toISOString().slice(0, 10)}`;
 			</li>
 			<li class="flex gap-3">
 				<span class="shrink-0 font-mono text-[12px] text-faint">2</span>
-				<span
-					>Create the directory and add its <code class="font-mono text-[12.5px]">about.yaml</code
-					>:</span
-				>
+				<span>
+					Run
+					<code class="font-mono text-[12.5px] text-ink">bun run new-tool</code>
+					for an interactive scaffold, or create the directory and
+					<code class="font-mono text-[12.5px]">about.yaml</code> manually:
+				</span>
 			</li>
 		</ol>
 
@@ -108,6 +110,7 @@ lastVerified: ${new Date().toISOString().slice(0, 10)}`;
 			class="mt-3 overflow-x-auto rounded-md border border-line bg-canvas p-3 font-mono text-[11.5px] leading-relaxed text-muted">{template}</pre>
 
 		<p class="mt-2 text-[12px] leading-snug text-faint">
+			<span class="text-muted">url</span> is the primary website or repository link.
 			<span class="text-muted">category</span> must be one of: {categoryIds.join(', ')}.
 			<span class="text-muted">platforms</span>: windows, linux, web, macos, android, ios.
 			<span class="text-muted">pricing</span>: free, freemium, paid.
