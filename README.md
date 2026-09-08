@@ -58,15 +58,15 @@ The catalogue lives in [`tools/`](tools). Adding a tool is one pull request with
 | directory name | yes      | the tool id; kebab-case and unique                                                                  |
 | `name`         | yes      | as the tool calls itself                                                                            |
 | `description`  | yes      | 10 to 300 characters, plain and factual                                                             |
-| `url`          | yes      | https only                                                                                          |
-| `urls`         | no       | `{ poe1, poe2 }` when the games have separate pages                                                 |
+| `url`          | yes      | primary https link; use the repository when there is no separate website                            |
+| `urls`         | no       | `{ poe1, poe2 }` when the games have separate primary links                                         |
 | `games`        | yes      | any of `poe1`, `poe2`                                                                               |
 | `category`     | yes      | one of the ids in `tools/categories.yaml`                                                           |
 | `tags`         | no       | kebab-case, used by search                                                                          |
 | `platforms`    | yes      | `windows`, `macos`, `linux`, `web`, `android`, `ios`                                                |
 | `pricing`      | yes      | `free`, `freemium`, `paid`                                                                          |
 | `openSource`   | yes      | stated outright, so a missing repo link never reads as proprietary                                  |
-| `source`       | no       | repository URL; only valid when `openSource` is true                                                |
+| `source`       | no       | repository URL when different from `url`; only valid when `openSource` is true                      |
 | `sources`      | no       | `{ poe1, poe2 }` for projects with a repository per game                                            |
 | `official`     | no       | published by Grinding Gear Games rather than the community                                          |
 | `editorsPick`  | no       | what we would hand a new player first                                                               |

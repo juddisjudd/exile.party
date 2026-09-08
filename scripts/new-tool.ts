@@ -187,7 +187,7 @@ async function main() {
 	const id = await directoryId(name);
 	const directory = resolve(TOOLS_DIRECTORY, id);
 	const description = await requiredText('Description', 10, 300);
-	const url = (await httpsUrl('Website URL'))!;
+	const url = (await httpsUrl('Website or repository URL'))!;
 	const games = await chooseMany(
 		'Games',
 		Game.options.map((value) => ({
@@ -234,14 +234,19 @@ async function main() {
 
 	stdout.write('\nOptional fields\n');
 
-	if (games.length > 1 && (await yesNo('Use separate website URLs for each game?', false))) {
+	if (
+		games.length > 1 &&
+		(await yesNo('Use separate website or repository URLs for each game?', false))
+	) {
 		const urls: Record<string, string> = {};
-		for (const game of games) urls[game] = (await httpsUrl(`${game} website URL`))!;
+		for (const game of games) {
+			urls[game] = (await httpsUrl(`${game} website or repository URL`))!;
+		}
 		tool.urls = urls;
 	}
 
 	if (openSource) {
-		const source = await httpsUrl('Repository URL', true);
+		const source = await httpsUrl('Repository URL, if different from the primary URL', true);
 		if (source) tool.source = source;
 		if (games.length > 1 && (await yesNo('Use separate repositories for each game?', false))) {
 			const sources: Record<string, string> = {};

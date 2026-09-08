@@ -110,6 +110,7 @@ lastVerified: ${new Date().toISOString().slice(0, 10)}`;
 			class="mt-3 overflow-x-auto rounded-md border border-line bg-canvas p-3 font-mono text-[11.5px] leading-relaxed text-muted">{template}</pre>
 
 		<p class="mt-2 text-[12px] leading-snug text-faint">
+			<span class="text-muted">url</span> is the primary website or repository link.
 			<span class="text-muted">category</span> must be one of: {categoryIds.join(', ')}.
 			<span class="text-muted">platforms</span>: windows, linux, web, macos, android, ios.
 			<span class="text-muted">pricing</span>: free, freemium, paid.
