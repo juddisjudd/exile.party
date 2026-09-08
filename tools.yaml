@@ -579,6 +579,8 @@ tools:
       Ad-supported. Layouts change at the daily server reset, and the site's bot protection may show
       a verification screen first.
     icon: poelab.png
+    screenshots:
+      - uber-lab-layout.webp
 
   - id: r-pathofexile
     name: r/pathofexile
