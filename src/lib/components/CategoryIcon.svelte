@@ -12,6 +12,8 @@
 		trade: 'M2.5 5.5h9l-2.5-2.5M13.5 10.5h-9l2.5 2.5',
 		crafting: 'M9.5 2.5 13.5 6.5 6 14l-4-4ZM2 14h4M9.5 6.5l-1-1',
 		'atlas-and-maps': 'M2 4.5 6 3l4 1.5 4-1.5v8.5L10 13 6 11.5 2 13ZM6 3v8.5M10 4.5V13',
+		'regex-and-search':
+			'M6.5 10.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM9.5 9.5l4 4M6.5 4.5v4M4.8 5.5l3.4 2M4.8 7.5l3.4-2',
 		'loot-filters': 'M2.5 3h11L9.5 8.5V13l-3 1V8.5Z',
 		'overlays-and-companions': 'M8 2.5 14 5.5 8 8.5 2 5.5ZM2 8.5l6 3 6-3M2 11.5l6 3 6-3',
 		'economy-and-data': 'M2.5 13.5h11M4 11V8M7 11V5M10 11V7M13 11V3.5',
