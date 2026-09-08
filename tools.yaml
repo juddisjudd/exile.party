@@ -11,6 +11,9 @@ categories:
   - id: atlas-and-maps
     name: Atlas and Maps
     description: Atlas planners, map mod checkers, layout guides.
+  - id: regex-and-search
+    name: Regex and Search
+    description: Regex builders for stash, vendor and map-mod search strings.
   - id: loot-filters
     name: Loot Filters
     description: Filter editors, filter distributions, sound packs.
@@ -368,3 +371,267 @@ tools:
     notes: Needs borderless windowed mode and UI brightness above -0.8, or the capture fails.
     screenshots:
       - overlay.webp
+
+  - id: maps-of-exile
+    name: Maps of Exile
+    author: deathbeam
+    headline: Rank every map by layout, density, boss and card value to pick a farming target
+    description: >-
+      Ranks and filters every map by layout, monster density, boss difficulty and divination card
+      value, with layout images and drop data per map.
+    url: https://mapsofexile.com/
+    games: [poe1]
+    category: atlas-and-maps
+    tags: [farming, layouts, divination-cards]
+    platforms: [web]
+    pricing: free
+    openSource: true
+    source: https://github.com/deathbeam/maps-of-exile
+    status: active
+    lastVerified: 2026-09-08
+    notes: >-
+      Card prices come from poe.ninja and are unreliable early in a league; switch the price source
+      to Standard until they settle.
+    icon: maps-of-exile.png
+    screenshots:
+      - map-list.webp
+      - cards.webp
+
+  - id: path-of-exile-2-wiki
+    name: Path of Exile 2 Wiki
+    headline: The community-maintained wiki for the sequel's classes, skills, items and mechanics
+    description: >-
+      Community-maintained MediaWiki reference for classes, ascendancies, skills, items, mechanics
+      and patch history, run by the same team as the original game's wiki.
+    url: https://www.poe2wiki.net/
+    games: [poe2]
+    category: community
+    tags: [wiki, reference]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    status: active
+    lastVerified: 2026-09-08
+    notes: >-
+      Still marked work in progress by its editors. Bot protection may show a short verification
+      screen on first load.
+    icon: path-of-exile-2-wiki.png
+    screenshots:
+      - main-page.webp
+      - unique-item.webp
+
+  - id: path-of-exile-discord
+    name: Path of Exile Discord
+    headline: The main community Discord for both games, with build help and looking-for-group channels
+    description: >-
+      Community-run Discord server with build help, campaign, endgame, news and looking-for-group
+      channels for both games.
+    url: https://discord.gg/pathofexile
+    games: [poe1, poe2]
+    category: community
+    tags: [discord, build-help, looking-for-group]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    status: active
+    lastVerified: 2026-09-08
+    notes: Community-run rather than staffed by GGG. Trading is not its focus; use The Forbidden Trove for that.
+    icon: path-of-exile-discord.png
+    screenshots:
+      - invite.webp
+
+  - id: path-of-exile-forums
+    name: Path of Exile Forums
+    author: Grinding Gear Games
+    headline: Patch notes, manifestos and the class build-guide subforums, straight from GGG
+    description: >-
+      The official forums: patch notes, development manifestos, per-class build guide subforums, bug
+      reports and the sequel's early access boards.
+    url: https://www.pathofexile.com/forum
+    games: [poe1, poe2]
+    category: community
+    tags: [forum, patch-notes, build-guides]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    official: true
+    status: active
+    lastVerified: 2026-09-08
+    notes: >-
+      Sequel boards live under the Early Access section rather than the class subforums. Posting
+      needs a GGG account.
+    icon: path-of-exile-forums.png
+    screenshots:
+      - forum-index.webp
+
+  - id: path-of-exile-wiki
+    name: Path of Exile Wiki
+    headline: The community-maintained wiki for items, skills, mechanics and league history
+    description: >-
+      Community-maintained MediaWiki reference for items, skills, mechanics, leagues and version
+      history, hosted by Grinding Gear Games since the move off Fandom.
+    url: https://www.poewiki.net/
+    games: [poe1]
+    category: community
+    tags: [wiki, reference]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    status: active
+    lastVerified: 2026-09-08
+    notes: >-
+      Bot protection may show a short verification screen on first load. Prefer this over the
+      outdated Fandom mirror.
+    icon: path-of-exile-wiki.png
+    screenshots:
+      - main-page.webp
+      - unique-item.webp
+
+  - id: pobb-in
+    name: POBb.in
+    author: Dav1dde
+    headline: Share a Path of Building build as a link that renders the tree, gear and stats
+    description: >-
+      Pastebin for Path of Building codes that renders the tree, gear and stats in the browser, and
+      the share target built into Path of Building.
+    url: https://pobb.in/
+    games: [poe1, poe2]
+    category: build-planning
+    tags: [build-sharing, import-export]
+    platforms: [web]
+    pricing: free
+    openSource: true
+    source: https://github.com/Dav1dde/pasteofexile
+    status: active
+    lastVerified: 2026-09-08
+    notes: >-
+      Works with both Path of Building and its PoE2 fork. Links render read-only; import into Path of
+      Building to edit.
+    icon: pobb-in.svg
+    screenshots:
+      - build-view.webp
+      - share.webp
+
+  - id: poe-re
+    name: poe.re
+    author: veiset
+    headline: Build a regex for stash and vendor searches, from map mods to scarabs and jewels
+    description: >-
+      Generates regex strings for in-game stash and vendor searches, covering map mods, vendor items,
+      expedition, heist, scarabs, tattoos, runegrafts and jewels.
+    url: https://poe.re/
+    games: [poe1]
+    category: regex-and-search
+    tags: [regex, map-mods, vendor-search]
+    platforms: [web]
+    pricing: free
+    openSource: true
+    source: https://github.com/veiset/poe.re
+    status: active
+    lastVerified: 2026-09-08
+    notes: >-
+      The map-mods generator doubles as a dangerous-mod checker through stash search. PoE2 has its own
+      site at poe2.re.
+    icon: poe-re.png
+    screenshots:
+      - vendor.webp
+      - map-mods.webp
+
+  - id: poe2-re
+    name: poe2.re
+    author: veiset
+    headline: Build a regex for waystone, tablet, relic and vendor searches
+    description: >-
+      Generates regex strings for stash and vendor searches, covering waystones, tablets, relics,
+      vendor items and rare item crafting.
+    url: https://poe2.re/
+    games: [poe2]
+    category: regex-and-search
+    tags: [regex, vendor-search, waystones]
+    platforms: [web]
+    pricing: free
+    openSource: true
+    source: https://github.com/veiset/poe.re
+    status: active
+    lastVerified: 2026-09-08
+    notes: Shares a codebase with poe.re; league and economy data refresh hourly.
+    icon: poe2-re.png
+    screenshots:
+      - vendor.webp
+      - waystones.webp
+
+  - id: poelab
+    name: PoELab
+    headline: Today's Labyrinth layouts for all four difficulties, with the route and secrets marked
+    description: >-
+      Publishes the daily Labyrinth layouts for all four difficulties after each reset, with the
+      route, secret areas, Izaro modifiers and trap warnings marked.
+    url: https://www.poelab.com/
+    games: [poe1]
+    category: atlas-and-maps
+    tags: [labyrinth, layouts, daily]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    status: active
+    lastVerified: 2026-09-08
+    notes: >-
+      Ad-supported. Layouts change at the daily server reset, and the site's bot protection may show
+      a verification screen first.
+    icon: poelab.png
+    screenshots:
+      - uber-lab-layout.webp
+
+  - id: r-pathofexile
+    name: r/pathofexile
+    headline: The main subreddit, with patch-note discussion, build showcases and tool announcements
+    description: >-
+      The main subreddit, where patch notes, build showcases, tool announcements and developer
+      replies are discussed.
+    url: https://www.reddit.com/r/pathofexile/
+    games: [poe1]
+    category: community
+    tags: [reddit, news]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    status: active
+    lastVerified: 2026-09-08
+    notes: Sequel discussion has largely moved to r/PathOfExile2.
+
+  - id: r-pathofexile2
+    name: r/PathOfExile2
+    headline: The sequel's subreddit, where new tools and patch notes land first
+    description: >-
+      The sequel's subreddit, where patch notes, tool releases, build clips and developer responses
+      land first.
+    url: https://www.reddit.com/r/PathOfExile2/
+    games: [poe2]
+    category: community
+    tags: [reddit, news]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    status: active
+    lastVerified: 2026-09-08
+    notes: Separate from r/pathofexile; check both when a tool covers both games.
+
+  - id: wealthy-exile
+    name: Wealthy Exile
+    headline: Track your stash value and currency per hour without installing anything
+    description: >-
+      Web-based wealth tracker that snapshots your stash, reports currency per hour and breaks value
+      down per tab, alongside shared farming strategies.
+    url: https://wealthyexile.com/
+    games: [poe1]
+    category: trade
+    tags: [wealth-tracker, stash, farming]
+    platforms: [web]
+    pricing: free
+    openSource: false
+    status: active
+    lastVerified: 2026-09-08
+    notes: Requires logging in with a pathofexile.com account through OAuth.
+    icon: wealthy-exile.png
+    screenshots:
+      - landing.webp
