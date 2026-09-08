@@ -12,48 +12,49 @@
 ---
 
 Every listing says what platform a tool runs on, what it costs, whether the source is open, and
-when someone last checked the entry. The whole catalogue is one YAML file.
+when someone last checked the entry. Each tool keeps its metadata and images in one directory.
 
 ## Add a tool
 
-The catalogue lives in [`tools.yaml`](tools.yaml). Adding a tool is one pull request against it.
+The catalogue lives in [`tools/`](tools). Adding a tool is one pull request with a new directory.
 
 1. Fork this repository, or use
-   [the edit link](https://github.com/poetoollist/exile.party/edit/main/tools.yaml) and GitHub will
-   fork it for you.
-2. Add an entry under `tools:`:
+   [the new-file link](https://github.com/poetoollist/exile.party/new/main/tools?filename=your-tool%2Fabout.yaml)
+   and GitHub will fork it for you.
+2. Create `tools/your-tool/about.yaml`. The directory name is the tool's kebab-case id:
 
    ```yaml
-   - id: your-tool
-     name: Your Tool
-     description: One factual sentence, 10 to 300 characters.
-     url: https://example.com
-     games: [poe1, poe2]
-     category: overlays-and-companions
-     tags: [overlay, price-check]
-     platforms: [windows, linux]
-     pricing: free
-     openSource: true
-     source: https://github.com/you/your-tool
-     status: active
-     lastVerified: 2026-09-05
+   name: Your Tool
+   description: One factual sentence, 10 to 300 characters.
+   url: https://example.com
+   games: [poe1, poe2]
+   category: overlays-and-companions
+   tags: [overlay, price-check]
+   platforms: [windows, linux]
+   pricing: free
+   openSource: true
+   source: https://github.com/you/your-tool
+   status: active
+   lastVerified: 2026-09-05
    ```
 
-3. Run `bun run validate`. It checks the entry against the schema and prints the offending field if
+3. Optionally add `tools/your-tool/icon.png` (also `.svg` or `.webp`). Put screenshots in
+   `tools/your-tool/shots/` and list their filenames under `screenshots:` in display order.
+4. Run `bun run validate`. It checks every entry and asset, and prints the offending path if
    anything is wrong.
-4. Open a pull request.
+5. Open a pull request.
 
 ### Fields
 
 | Field          | Required | Notes                                                                                               |
 |----------------|----------|-----------------------------------------------------------------------------------------------------|
-| `id`           | yes      | kebab-case, unique                                                                                  |
+| directory name | yes      | the tool id; kebab-case and unique                                                                  |
 | `name`         | yes      | as the tool calls itself                                                                            |
 | `description`  | yes      | 10 to 300 characters, plain and factual                                                             |
 | `url`          | yes      | https only                                                                                          |
 | `urls`         | no       | `{ poe1, poe2 }` when the games have separate pages                                                 |
 | `games`        | yes      | any of `poe1`, `poe2`                                                                               |
-| `category`     | yes      | one of the ids under `categories:` in the same file                                                 |
+| `category`     | yes      | one of the ids in `tools/categories.yaml`                                                           |
 | `tags`         | no       | kebab-case, used by search                                                                          |
 | `platforms`    | yes      | `windows`, `macos`, `linux`, `web`, `android`, `ios`                                                |
 | `pricing`      | yes      | `free`, `freemium`, `paid`                                                                          |
@@ -65,8 +66,7 @@ The catalogue lives in [`tools.yaml`](tools.yaml). Adding a tool is one pull req
 | `byMaintainer` | no       | written by a maintainer of this site; the card discloses it                                         |
 | `author`       | no       | who makes the tool; otherwise the GitHub owner of `source` or `url` is shown                        |
 | `headline`     | no       | one sentence for the tool page, 10 to 120 characters; otherwise the first sentence of `description` |
-| `icon`         | no       | file name under `static/icons/`, `svg`, `png` or `webp`; otherwise a monogram                       |
-| `screenshots`  | no       | list of file names under `static/shots/<id>/`, shown in that order                                  |
+| `screenshots`  | no       | list of file names under the tool's `shots/` directory, shown in that order                          |
 | `status`       | yes      | `active`, `unmaintained`, `dead`                                                                    |
 | `lastVerified` | yes      | `YYYY-MM-DD`; entries older than six months are flagged as stale                                    |
 | `notes`        | no       | one caveat worth knowing, up to 300 characters                                                      |
@@ -87,17 +87,18 @@ bun run dev
 | `bun run dev`       | dev server                                                 |
 | `bun run build`     | generates OG images, then builds the static site to `build` |
 | `bun run preview`   | serves the built site                                      |
-| `bun run validate`  | checks `tools.yaml` against the schema                     |
+| `bun run validate`  | checks tool metadata and collocated assets                 |
 | `bun run og`        | regenerates the OG images and the banner above             |
 | `bun run lint`      | prettier and eslint                                        |
 | `bun run check`     | svelte-check                                               |
 | `bun run test`      | unit tests                                                 |
 | `bun run test:e2e`  | Playwright tests                                           |
 
-Built with SvelteKit and Tailwind, prerendered to static files by `adapter-static`. The catalogue is
-parsed and validated with Zod at build time, so a malformed entry fails the build rather than the
-page. Open Graph cards are rendered by [Takumi](https://takumi.kane.tw) into `static/og`, which is
-gitignored and regenerated on every build.
+Built with SvelteKit and Tailwind, prerendered to static files by `adapter-static`. Metadata is
+loaded from `tools/*/about.yaml` and validated with Zod at build time, so a malformed entry fails
+the build rather than the page. Vite bundles each directory's icon and screenshots as static
+assets. Open Graph cards are rendered by [Takumi](https://takumi.kane.tw) into `static/og`, which
+is gitignored and regenerated on every build.
 
 ## Licence
 
