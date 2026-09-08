@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { GAME_LABEL } from '$lib/catalog/display';
 	import type { Game } from '$lib/catalog/schema';
+	import Mark from './Mark.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 
 	interface Props {
@@ -119,10 +120,11 @@
 		<div class="flex h-14 items-center gap-4">
 			<a
 				href={resolve('/')}
-				class="shrink-0 text-[15px] font-medium tracking-tight text-ink"
+				class="flex shrink-0 items-center gap-2 text-[15px] font-medium tracking-tight text-ink"
 				aria-label="exile.party home"
 			>
-				exile<span class="text-faint">.</span>party
+				<Mark />
+				<span>exile<span class="text-faint">.</span>party</span>
 			</a>
 
 			{#if context}

@@ -28,7 +28,10 @@ const C = {
 	ink: '#eceded',
 	muted: '#b3b4bd',
 	faint: '#82848f',
-	accent: '#7b8ff0'
+	// The mark's constants, as in tokens.css and favicon.svg.
+	tile: '#141619',
+	glyph: '#bed7d7',
+	dot: '#7b8ff0'
 };
 
 const FONT_DIR = 'node_modules/@fontsource-variable/geist/files';
@@ -41,12 +44,28 @@ function esc(s: string): string {
 		.replace(/"/g, '&quot;');
 }
 
-/** Shared chrome: brand top-left, an accent rule down the left edge. */
+/** The mark, built from boxes because the renderer cannot take the SVG: the same 256-unit geometry
+ *  as src/lib/assets/favicon.svg, scaled to `px`. */
+function mark(px: number): string {
+	const u = px / 256;
+	const box = (l: number, t: number, w: number, h: number, bg: string, corner = '') =>
+		`<div style="display:flex;position:absolute;left:${l * u}px;top:${t * u}px;width:${w * u}px;height:${h * u}px;background:${bg};${corner}"></div>`;
+	return `<div style="display:flex;position:relative;width:${px}px;height:${px}px;border-radius:${56 * u}px;background:${C.tile}">
+      ${box(58, 30, 52, 196, C.glyph)}
+      ${box(130, 30, 82, 52, C.glyph, `border-top-right-radius:${48 * u}px`)}
+      ${box(130, 102, 82, 52, C.glyph, `border-bottom-right-radius:${48 * u}px`)}
+      ${box(130, 174, 52, 52, C.dot, `border-radius:${19 * u}px`)}
+    </div>`;
+}
+
+/** Shared chrome: the mark and the name top-left, the page's eyebrow top-right. */
 function card(body: string, eyebrow: string): string {
 	return `<div style="display:flex;flex-direction:column;width:100%;height:100%;background:${C.canvas};font-family:Geist;padding:72px 80px;position:relative">
-    <div style="display:flex;position:absolute;left:0;top:0;width:8px;height:100%;background:${C.accent}"></div>
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="display:flex;font-size:26px;font-weight:500;color:${C.ink}">${esc(SITE_NAME)}</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        ${mark(36)}
+        <div style="display:flex;font-size:26px;font-weight:500;color:${C.ink}">${esc(SITE_NAME)}</div>
+      </div>
       <div style="display:flex;font-size:22px;color:${C.faint}">${esc(eyebrow)}</div>
     </div>
     ${body}
