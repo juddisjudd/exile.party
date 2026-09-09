@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Catalog, Tool, ToolMetadata } from './schema';
+import { Catalog, START_HERE_ID, Tool, ToolMetadata } from './schema';
 
 const valid = {
 	id: 'example-tool',
@@ -21,6 +21,7 @@ describe('Tool', () => {
 		expect(t.tags).toEqual([]);
 		expect(t.official).toBe(false);
 		expect(t.editorsPick).toBe(false);
+		expect(t.newPlayer).toBe(false);
 		expect(t.byMaintainer).toBe(false);
 	});
 
@@ -56,6 +57,63 @@ describe('Tool', () => {
 
 	it('defaults screenshots to an empty list', () => {
 		expect(Tool.parse(valid).screenshots).toEqual([]);
+	});
+
+	it('defaults alsoIn to an empty list and leaves rank unset', () => {
+		const t = Tool.parse(valid);
+		expect(t.alsoIn).toEqual([]);
+		expect(t.rank).toBeUndefined();
+	});
+
+	it('accepts a rank for the tool own category', () => {
+		const r = Tool.safeParse({ ...valid, rank: { trade: 1 } });
+		expect(r.success).toBe(true);
+	});
+
+	it('accepts a start-here rank alongside a category rank when the tool is a new-player pick', () => {
+		const r = Tool.safeParse({
+			...valid,
+			newPlayer: true,
+			rank: { trade: 1, 'start-here': 2 }
+		});
+		expect(r.success).toBe(true);
+	});
+
+	it('rejects a start-here rank without newPlayer', () => {
+		const r = Tool.safeParse({ ...valid, rank: { 'start-here': 1 } });
+		expect(r.success).toBe(false);
+		expect(r.error?.issues[0].path).toEqual(['rank', 'start-here']);
+	});
+
+	it('rejects a start-here rank when only editorsPick is set', () => {
+		const r = Tool.safeParse({ ...valid, editorsPick: true, rank: { 'start-here': 1 } });
+		expect(r.success).toBe(false);
+		expect(r.error?.issues[0].path).toEqual(['rank', 'start-here']);
+	});
+
+	it('rejects a rank key that is not the category or in alsoIn', () => {
+		const r = Tool.safeParse({ ...valid, rank: { crafting: 1 } });
+		expect(r.success).toBe(false);
+	});
+
+	it('accepts a rank key that is in alsoIn', () => {
+		const r = Tool.safeParse({ ...valid, alsoIn: ['crafting'], rank: { crafting: 1 } });
+		expect(r.success).toBe(true);
+	});
+
+	it.each([
+		['alsoIn repeating the primary category', { ...valid, alsoIn: ['trade'] }],
+		['alsoIn listing an id twice', { ...valid, alsoIn: ['crafting', 'crafting'] }],
+		['a rank of zero', { ...valid, rank: { trade: 0 } }],
+		['a fractional rank', { ...valid, rank: { trade: 1.5 } }]
+	])('rejects %s', (_, input) => {
+		expect(Tool.safeParse(input).success).toBe(false);
+	});
+
+	it('points at alsoIn when it repeats the primary category', () => {
+		const r = Tool.safeParse({ ...valid, alsoIn: ['trade'] });
+		expect(r.error?.issues[0].path).toEqual(['alsoIn']);
+		expect(r.error?.issues[0].message).toMatch(/alsoIn/);
 	});
 
 	it('accepts the display fields', () => {
@@ -98,6 +156,22 @@ describe('Catalog', () => {
 		const r = Catalog.safeParse({ categories, tools: [{ ...valid, category: 'nope' }] });
 		expect(r.success).toBe(false);
 		expect(r.error?.issues[0].message).toMatch(/unknown category/);
+	});
+
+	it('rejects an unknown category in alsoIn and points at the entry', () => {
+		const r = Catalog.safeParse({ categories, tools: [{ ...valid, alsoIn: ['nope'] }] });
+		expect(r.success).toBe(false);
+		expect(r.error?.issues[0].message).toMatch(/unknown category nope/);
+		expect(r.error?.issues[0].path).toEqual(['tools', 0, 'alsoIn', 0]);
+	});
+
+	it('reserves start-here for the virtual section', () => {
+		const r = Catalog.safeParse({
+			categories: [...categories, { id: START_HERE_ID, name: 'Start here' }],
+			tools: []
+		});
+		expect(r.success).toBe(false);
+		expect(r.error?.issues[0].message).toMatch(/reserved/);
 	});
 
 	it('rejects an empty category list', () => {

@@ -6,6 +6,8 @@ url: https://kvan7.github.io/Exiled-Exchange-2/download
 games:
   - poe2
 category: trade
+alsoIn:
+  - overlays-and-companions
 tags:
   - price-check
   - overlay
@@ -16,7 +18,6 @@ platforms:
 pricing: free
 openSource: true
 source: https://github.com/Kvan7/Exiled-Exchange-2
-editorsPick: true
 status: active
 lastVerified: 2026-09-07
 screenshots:
