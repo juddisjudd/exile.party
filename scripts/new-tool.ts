@@ -2,8 +2,9 @@ import { checkbox, confirm, input, select } from '@inquirer/prompts';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { stdout } from 'node:process';
-import { stringify } from 'yaml';
 import { z } from 'zod';
+import { toolId } from '../src/lib/catalog/id';
+import { toolYaml } from '../src/lib/catalog/yaml';
 import {
 	Game,
 	Platform,
@@ -17,16 +18,6 @@ import { loadCatalog, TOOLS_DIRECTORY } from '../src/lib/server/catalog';
 interface Choice<T extends string> {
 	value: T;
 	label: string;
-}
-
-function toolId(name: string): string {
-	return name
-		.normalize('NFKD')
-		.replace(/[\u0300-\u036f]/g, '')
-		.toLowerCase()
-		.replace(/&/g, ' and ')
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-|-$/g, '');
 }
 
 async function requiredName(existingTools: readonly Tool[]): Promise<string> {
@@ -279,7 +270,7 @@ async function main() {
 	}
 
 	mkdirSync(directory);
-	writeFileSync(resolve(directory, 'about.yaml'), stringify(tool), { flag: 'wx' });
+	writeFileSync(resolve(directory, 'about.yaml'), toolYaml(result.data), { flag: 'wx' });
 	if (screenshots) mkdirSync(resolve(directory, 'shots'));
 
 	stdout.write(`\nCreated tools/${id}/about.yaml\n`);
